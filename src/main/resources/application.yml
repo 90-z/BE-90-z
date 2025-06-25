@@ -1,0 +1,14 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: be-90z
+  servlet:
+    multipart:
+      max-file-size: 10MB # 개별 파일의 최대 크기
+      max-request-size: 10MB # 전체 요청의 최대 크기
+  config:
+    import: optional:file:.env[.properties]
+  datasource:
+    url: jdbc:mariadb://${MARIADB_HOST}:${MARIADB_PORT}/${MARIADB_DATABASE}
