@@ -1,5 +1,6 @@
 package com.be90z.domain.raffle.repository;
 
+import com.be90z.domain.challenge.entity.Challenge;
 import com.be90z.domain.raffle.entity.RaffleEntry;
 import com.be90z.domain.raffle.entity.RaffleWinner;
 import com.be90z.domain.mission.entity.Mission;
@@ -45,8 +46,18 @@ class RaffleWinnerRepositoryTest {
                 .build();
         entityManager.persistAndFlush(user);
 
+        Challenge challenge = Challenge.builder()
+                .challengeName("당첨 챌린지")
+                .challengeDescription("당첨 챌린지 설명")
+                .startDate(LocalDateTime.now().minusDays(35))
+                .endDate(LocalDateTime.now().minusDays(5))
+                .createdAt(LocalDateTime.now().minusDays(35))
+                .build();
+        entityManager.persistAndFlush(challenge);
+
         Mission mission = Mission.builder()
                 .missionCode(1L)
+                .challenge(challenge)
                 .missionName("당첨 미션")
                 .missionContent("당첨 미션 내용")
                 .missionStatus(MissionStatus.COMPLETED)
@@ -117,8 +128,18 @@ class RaffleWinnerRepositoryTest {
                 .build();
         entityManager.persistAndFlush(user2);
 
+        Challenge challenge2 = Challenge.builder()
+                .challengeName("당첨 챌린지2")
+                .challengeDescription("당첨 챌린지2 설명")
+                .startDate(LocalDateTime.now().minusDays(35))
+                .endDate(LocalDateTime.now().minusDays(5))
+                .createdAt(LocalDateTime.now().minusDays(35))
+                .build();
+        entityManager.persistAndFlush(challenge2);
+
         Mission mission = Mission.builder()
                 .missionCode(2L)
+                .challenge(challenge2)
                 .missionName("당첨 미션2")
                 .missionContent("당첨 미션2 내용")
                 .missionStatus(MissionStatus.COMPLETED)

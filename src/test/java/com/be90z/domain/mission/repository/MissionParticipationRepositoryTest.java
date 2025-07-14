@@ -98,8 +98,18 @@ class MissionParticipationRepositoryTest {
                 .build();
         entityManager.persistAndFlush(user);
 
+        Challenge challenge2 = Challenge.builder()
+                .challengeName("테스트 챌린지2")
+                .challengeDescription("테스트 챌린지2 설명")
+                .startDate(LocalDateTime.now().minusDays(5))
+                .endDate(LocalDateTime.now().plusDays(25))
+                .createdAt(LocalDateTime.now().minusDays(5))
+                .build();
+        entityManager.persistAndFlush(challenge2);
+
         Mission mission = Mission.builder()
                 .missionCode(2L)
+                .challenge(challenge2)
                 .missionName("테스트 미션2")
                 .missionContent("테스트 미션2 내용")
                 .missionStatus(MissionStatus.ACTIVE)
@@ -140,8 +150,18 @@ class MissionParticipationRepositoryTest {
                 .build();
         entityManager.persistAndFlush(user);
 
+        Challenge challenge3 = Challenge.builder()
+                .challengeName("완료된 챌린지")
+                .challengeDescription("완료된 챌린지 설명")
+                .startDate(LocalDateTime.now().minusDays(35))
+                .endDate(LocalDateTime.now().minusDays(5))
+                .createdAt(LocalDateTime.now().minusDays(35))
+                .build();
+        entityManager.persistAndFlush(challenge3);
+
         Mission mission = Mission.builder()
                 .missionCode(3L)
+                .challenge(challenge3)
                 .missionName("완료된 미션")
                 .missionContent("완료된 미션 내용")
                 .missionStatus(MissionStatus.COMPLETED)
