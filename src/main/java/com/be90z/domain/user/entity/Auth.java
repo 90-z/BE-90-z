@@ -1,5 +1,5 @@
 package com.be90z.domain.user.entity;
 
-public enum AuthType {
+public enum Auth {
     USER, ADMIN
 }
