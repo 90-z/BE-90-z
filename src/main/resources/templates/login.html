@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>카카오 로그인 테스트</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        button {
+            background-color: #FEE500;
+            color: #000;
+            border: none;
+            padding: 15px 30px;
+            font-size: 18px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px;
+        }
+        button:hover {
+            background-color: #FDD835;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f0f0f0;
+            border-radius: 5px;
+            word-wrap: break-word;
+        }
+    </style>
+</head>
+<body>
+<h1>🔑 카카오 로그인 테스트</h1>
+
+<button onclick="startKakaoLogin()">카카오 로그인하기</button>
+
+<div id="result"></div>
+
+<script>
+    async function startKakaoLogin() {
+        try {
+            // 1. 로그인 URL 받기
+            const response = await fetch('http://localhost:8080/api/v1/auth/kakao/login-url');
+            const data = await response.json();
+
+            if (data.loginUrl) {
+                // 2. 카카오 로그인 페이지로 이동
+                document.getElementById('result').innerHTML =
+                    `<p>카카오 로그인 페이지로 이동합니다...</p>
+                         <p>로그인 완료 후 자동으로 돌아옵니다.</p>`;
+
+                setTimeout(() => {
+                    window.location.href = data.loginUrl;
+                }, 2000);
+            } else {
+                document.getElementById('result').innerHTML =
+                    '<p style="color: red;">로그인 URL을 가져오는데 실패했습니다.</p>';
+            }
+        } catch (error) {
+            document.getElementById('result').innerHTML =
+                '<p style="color: red;">오류: ' + error.message + '</p>';
+        }
+    }
+
+    // 페이지 로드시 결과 확인
+    window.onload = function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const hasResult = window.location.search.includes('token') ||
+            window.location.search.includes('message') ||
+            document.body.innerText.includes('token');
+
+        if (hasResult) {
+            document.getElementById('result').innerHTML =
+                '<p style="color: green;">✅ 로그인 결과가 표시되었습니다!</p>';
+        }
+    };
+</script>
+</body>
+</html>
