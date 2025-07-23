@@ -4,13 +4,14 @@ import com.be90z.domain.user.entity.User;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
 @NoArgsConstructor
-@Table(name="recipe")
+@Table(name = "recipe")
 public class Recipe {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -40,8 +41,11 @@ public class Recipe {
     private LocalDateTime createdAt;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="user_id")
+    @JoinColumn(name = "user_id")
     private User user;
+
+    @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Ingredients> ingredients = new ArrayList<>();
 
     public Recipe(String recipeName, String recipeContent, Integer recipeCalories,
                   String recipeCookMethod, RecipePeople recipePeople,
@@ -49,9 +53,44 @@ public class Recipe {
         this.recipeName = recipeName;
         this.recipeContent = recipeContent;
         this.recipeCalories = recipeCalories;
-        this.recipeCookMethod = recipeCookMethod;
         this.recipePeople = recipePeople;
         this.recipeTime = recipeTime;
+        this.recipeCookMethod = recipeCookMethod;
         this.user = user;
     }
+
+    // 새로 추가할 생성자 (User 없음) - test 버전
+    public Recipe(String recipeName, String recipeContent, Integer recipeCalories,
+                  String recipeCookMethod, RecipePeople recipePeople,
+                  Integer recipeTime) {
+        this.recipeName = recipeName;
+        this.recipeContent = recipeContent;
+        this.recipeCalories = recipeCalories;
+        this.recipePeople = recipePeople;
+        this.recipeTime = recipeTime;
+        this.recipeCookMethod = recipeCookMethod;
+        this.user = null;
+    }
+
+    //    재료 추가 메서드
+    public void addIngredient(Ingredients ingredient) {
+        ingredients.add(ingredient);
+        ingredient.setRecipe(this);
+    }
+
+//    레시피 수정 메서드
+    public void updateRecipe(String recipeName, String recipeContent, Integer recipeCalories, String recipeCookMethod, RecipePeople recipePeople, Integer recipeTime) {
+        this.recipeName = recipeName;
+        this.recipeContent = recipeContent;
+        this.recipeCalories = recipeCalories;
+        this.recipePeople = recipePeople;
+        this.recipeTime = recipeTime;
+        this.recipeCookMethod = recipeCookMethod;
+    }
+
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+    }
+
 }
