@@ -1,6 +1,5 @@
 package com.be90z.domain.mission.entity;
 
-import com.be90z.domain.challenge.entity.Challenge;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
@@ -16,25 +15,15 @@ import java.time.LocalDateTime;
 public class Mission {
     
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "mission_code")
     private Long missionCode;
-    
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "challenge_id", nullable = false)
-    private Challenge challenge;
-    
-    @Column(name = "mission_name", nullable = false)
-    private String missionName;
     
     @Column(name = "mission_content", nullable = false, columnDefinition = "TEXT")
     private String missionContent;
     
-    @Enumerated(EnumType.STRING)
-    @Column(name = "mission_status", nullable = false)
-    private MissionStatus missionStatus;
-    
-    @Column(name = "mission_max")
-    private Integer missionMax;
+    @Column(name = "mission_goal_count", nullable = false)
+    private Integer missionGoalCount = 1;
     
     @Column(name = "start_date", nullable = false)
     private LocalDateTime startDate;
@@ -46,25 +35,15 @@ public class Mission {
     private LocalDateTime createdAt;
     
     @Builder
-    public Mission(Long missionCode, Challenge challenge, String missionName, String missionContent,
-                   MissionStatus missionStatus, Integer missionMax, 
+    public Mission(Long missionCode, String missionContent, Integer missionGoalCount,
                    LocalDateTime startDate, LocalDateTime endDate, LocalDateTime createdAt) {
-        if (challenge == null) {
-            throw new IllegalArgumentException("Challenge cannot be null");
-        }
-        if (missionName == null) {
-            throw new IllegalArgumentException("Mission name cannot be null");
-        }
         if (missionContent == null) {
             throw new IllegalArgumentException("Mission content cannot be null");
         }
         
         this.missionCode = missionCode;
-        this.challenge = challenge;
-        this.missionName = missionName;
         this.missionContent = missionContent;
-        this.missionStatus = missionStatus != null ? missionStatus : MissionStatus.ACTIVE;
-        this.missionMax = missionMax;
+        this.missionGoalCount = missionGoalCount != null ? missionGoalCount : 1;
         this.startDate = startDate;
         this.endDate = endDate;
         this.createdAt = createdAt != null ? createdAt : LocalDateTime.now();
