@@ -1,6 +1,7 @@
 package com.be90z.domain.recipe.dto;
 
 import com.be90z.domain.recipe.entity.RecipePeople;
+import jakarta.persistence.Lob;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -10,6 +11,7 @@ import java.util.List;
 public class RecipeResDTO {
     private Long recipeCode;
     private String recipeName;
+    @Lob
     private String recipeContent;
     private Integer recipeCalories;
     private String recipeCookMethod;
