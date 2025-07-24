@@ -1,6 +1,7 @@
 package com.be90z.domain.recipe.controller;
 
-import com.be90z.domain.recipe.dto.RecipeCreateDTO;
+import com.be90z.domain.recipe.dto.RecipeAiResDTO;
+import com.be90z.domain.recipe.dto.RecipeCreateFreeDTO;
 import com.be90z.domain.recipe.dto.RecipeResDTO;
 import com.be90z.domain.recipe.dto.RecipeUpdateDTO;
 import com.be90z.domain.recipe.service.RecipeService;
@@ -21,13 +22,22 @@ public class RecipeController {
 
     private final RecipeService recipeService;
 
+    @PostMapping("/ai")
+    @Operation(summary = " AI 레시피 분석", description = "제목과 내용을 AI로 분석하여 레시피 상세 내용을 생성합니다")
+    public ResponseEntity<RecipeAiResDTO> createRecipeWithAi(
+            @RequestBody RecipeCreateFreeDTO recipeCreateFreeDTO) throws IOException {
+        RecipeAiResDTO recipeAiResDTO = recipeService.createRecipeWithAi(recipeCreateFreeDTO);
+        return ResponseEntity.ok(recipeAiResDTO);
+    }
+
     @PostMapping
-    @Operation(summary = "레시피 등록", description = "새로운 레시피를 등록합니다")
+    @Operation(summary = "레시피 최종 등록", description = "AI가 적용된 레시피를 등록합니다")
     public ResponseEntity<Void> createRecipe(
-            @RequestBody RecipeCreateDTO recipeCreateDTO) throws IOException {
-        recipeService.createRecipe(recipeCreateDTO);
+            @RequestBody RecipeAiResDTO recipeAiResDTO) throws IOException {
+        recipeService.createRecipe(recipeAiResDTO);
         return ResponseEntity.ok().build();
     }
+
 
     @GetMapping
     @Operation(summary = "레시피 전체 조회", description = "등록된 모든 레시피를 조회합니다.")
