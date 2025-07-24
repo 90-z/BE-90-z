@@ -47,9 +47,7 @@ public class Recipe {
     @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Ingredients> ingredients = new ArrayList<>();
 
-    public Recipe(String recipeName, String recipeContent, Integer recipeCalories,
-                  String recipeCookMethod, RecipePeople recipePeople,
-                  Integer recipeTime, User user) {
+    public Recipe(String recipeName, String recipeContent) {
         this.recipeName = recipeName;
         this.recipeContent = recipeContent;
         this.recipeCalories = recipeCalories;
