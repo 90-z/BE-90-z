@@ -2,7 +2,6 @@ package com.be90z.domain.user.repository;
 
 import com.be90z.domain.user.entity.User;
 import com.be90z.domain.user.entity.UserAuthority;
-import com.be90z.domain.user.entity.Gender;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,8 +33,6 @@ class UserRepositoryTest {
                 .email("test@example.com")
                 .auth(UserAuthority.USER)
                 .createdAt(LocalDateTime.now())
-                .gender(Gender.WOMAN)
-                .birth(1990)
                 .build();
         entityManager.persistAndFlush(user);
 
@@ -57,8 +54,6 @@ class UserRepositoryTest {
                 .email("kakao@example.com")
                 .auth(UserAuthority.USER)
                 .createdAt(LocalDateTime.now())
-                .gender(Gender.MAN)
-                .birth(1985)
                 .build();
         entityManager.persistAndFlush(user);
 
@@ -80,8 +75,6 @@ class UserRepositoryTest {
                 .email("exists@example.com")
                 .auth(UserAuthority.USER)
                 .createdAt(LocalDateTime.now())
-                .gender(Gender.WOMAN)
-                .birth(1992)
                 .build();
         entityManager.persistAndFlush(user);
 
