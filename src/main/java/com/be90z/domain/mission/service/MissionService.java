@@ -5,7 +5,6 @@ import com.be90z.domain.mission.dto.response.MissionJoinResDTO;
 import com.be90z.domain.mission.dto.response.MissionListResDTO;
 import com.be90z.domain.mission.entity.Mission;
 import com.be90z.domain.mission.entity.MissionParticipation;
-import com.be90z.domain.mission.entity.MissionStatus;
 import com.be90z.domain.mission.entity.ParticipateStatus;
 import com.be90z.domain.mission.repository.MissionParticipationRepository;
 import com.be90z.domain.mission.repository.MissionRepository;
@@ -28,17 +27,15 @@ public class MissionService {
     private final UserRepository userRepository;
 
     public List<MissionListResDTO> getActiveMissions() {
-        List<Mission> missions = missionRepository.findByMissionStatusOrderByCreatedAtDesc(MissionStatus.ACTIVE);
+        List<Mission> missions = missionRepository.findAllByOrderByCreatedAtDesc();
         
         return missions.stream()
                 .map(mission -> {
                     Long participantCount = missionParticipationRepository.countCompletedParticipationsByMission(mission);
                     return MissionListResDTO.builder()
                             .missionCode(mission.getMissionCode())
-                            .missionName(mission.getMissionName())
                             .missionContent(mission.getMissionContent())
-                            .missionStatus(mission.getMissionStatus().name())
-                            .missionMax(mission.getMissionMax())
+                            .missionGoalCount(mission.getMissionGoalCount())
                             .startDate(mission.getStartDate())
                             .endDate(mission.getEndDate())
                             .currentParticipants(participantCount.intValue())
@@ -68,6 +65,7 @@ public class MissionService {
         MissionParticipation participation = MissionParticipation.builder()
                 .participateCode(participateCode)
                 .participateStatus(ParticipateStatus.PART_BEFORE)
+                .participateCount(0)
                 .user(user)
                 .mission(mission)
                 .build();
