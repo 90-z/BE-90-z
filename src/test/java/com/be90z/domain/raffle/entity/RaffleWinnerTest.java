@@ -1,5 +1,6 @@
 package com.be90z.domain.raffle.entity;
 
+import com.be90z.domain.challenge.entity.Challenge;
 import com.be90z.domain.mission.entity.MissionParticipation;
 import com.be90z.domain.mission.entity.Mission;
 import com.be90z.domain.mission.entity.MissionStatus;
@@ -31,8 +32,17 @@ class RaffleWinnerTest {
                 .birth(1990)
                 .build();
 
+        Challenge challenge = Challenge.builder()
+                .challengeName("테스트 챌린지")
+                .challengeDescription("테스트 챌린지 설명")
+                .startDate(LocalDateTime.now().minusDays(5))
+                .endDate(LocalDateTime.now().plusDays(25))
+                .createdAt(LocalDateTime.now().minusDays(5))
+                .build();
+
         Mission mission = Mission.builder()
                 .missionCode(1L)
+                .challenge(challenge)
                 .missionName("테스트 미션")
                 .missionContent("테스트 미션 내용")
                 .missionStatus(MissionStatus.ACTIVE)
