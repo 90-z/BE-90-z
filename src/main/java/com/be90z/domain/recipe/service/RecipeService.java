@@ -1,15 +1,19 @@
 package com.be90z.domain.recipe.service;
 
-import com.be90z.domain.recipe.dto.RecipeCreateDTO;
+import com.be90z.domain.recipe.dto.RecipeAiResDTO;
+import com.be90z.domain.recipe.dto.RecipeCreateFreeDTO;
 import com.be90z.domain.recipe.dto.RecipeResDTO;
 import com.be90z.domain.recipe.dto.RecipeUpdateDTO;
 import com.be90z.domain.recipe.entity.Ingredients;
 import com.be90z.domain.recipe.entity.Recipe;
 import com.be90z.domain.recipe.repository.RecipeRepository;
+import com.be90z.external.gemini.service.GeminiService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -18,21 +22,36 @@ import java.util.stream.Collectors;
 public class RecipeService {
 
     private final RecipeRepository recipeRepository;
+    private final GeminiService geminiService;
 
-    //    레시피 등록
+    //   AI로 레시피 분석
     @Transactional
-    public void createRecipe(RecipeCreateDTO recipeCreateDTO) {
-        Recipe recipe = new Recipe(
-                recipeCreateDTO.getRecipeName(),
-                recipeCreateDTO.getRecipeContent(),
-                recipeCreateDTO.getRecipeCalories(),
-                recipeCreateDTO.getRecipeCookMethod(),
-                recipeCreateDTO.getRecipePeople(),
-                recipeCreateDTO.getRecipeTime()
+    public RecipeAiResDTO createRecipeWithAi(RecipeCreateFreeDTO recipeCreateFreeDTO) throws IOException {
+        String geminiResJson = geminiService.analyzeRecipe(
+                recipeCreateFreeDTO.getRecipeName(),
+                recipeCreateFreeDTO.getRecipeContent()
         );
 
-        if (recipeCreateDTO.getIngredientsList() != null) {
-            for (RecipeCreateDTO.IngredientsDTO ingredientDTO : recipeCreateDTO.getIngredientsList()) {
+//        AI 결과 Json > DTO 변환
+        ObjectMapper objectMapper = new ObjectMapper();
+        RecipeAiResDTO recipeAiResDTO = objectMapper.readValue(geminiResJson, RecipeAiResDTO.class);
+        return recipeAiResDTO;
+    }
+
+    //    레시피 등록 - ai 후
+    @Transactional
+    public void createRecipe(RecipeAiResDTO recipeAiResDTO) {
+        Recipe recipe = new Recipe(
+                recipeAiResDTO.getRecipeName(),
+                recipeAiResDTO.getRecipeContent(),
+                recipeAiResDTO.getRecipeCalories(),
+                recipeAiResDTO.getRecipeCookMethod(),
+                recipeAiResDTO.getRecipePeople(),
+                recipeAiResDTO.getRecipeTime()
+        );
+
+        if (recipeAiResDTO.getIngredientsList() != null) {
+            for (RecipeAiResDTO.IngredientsDTO ingredientDTO : recipeAiResDTO.getIngredientsList()) {
                 Ingredients ingredient = new Ingredients(
                         ingredientDTO.getIngredientName(),
                         ingredientDTO.getIngredientsCount()
@@ -131,4 +150,6 @@ public class RecipeService {
         recipeResDTO.setIngredientsList(ingrdientssList);
         return recipeResDTO;
     }
+
+
 }

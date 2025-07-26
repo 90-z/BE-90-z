@@ -24,6 +24,10 @@ spring:
         format_sql: true
   thymeleaf:
     encoding: UTF-8
+  jackson:
+    parser:
+      allow-unquoted-control-chars: true # 이스케이프 되지 않은 제어문자 허용
+      allow-backslash-escaping-any-character: true
 
 jwt:
   secret: ${JWT_SECRET}

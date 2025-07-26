@@ -1,13 +1,15 @@
 package com.be90z.domain.recipe.dto;
 
 import com.be90z.domain.recipe.entity.RecipePeople;
+import jakarta.persistence.Lob;
 import lombok.Data;
 
 import java.util.List;
 
 @Data
-public class RecipeCreateDTO {
+public class RecipeAiResDTO {
     private String recipeName;
+    @Lob
     private String recipeContent;
     private Integer recipeCalories;
     private RecipePeople recipePeople;
