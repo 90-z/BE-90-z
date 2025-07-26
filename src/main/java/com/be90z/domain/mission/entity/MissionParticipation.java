@@ -44,4 +44,11 @@ public class MissionParticipation {
         this.user = user;
         this.mission = mission;
     }
+    
+    public void updateStatus(ParticipateStatus newStatus) {
+        if (newStatus == null) {
+            throw new IllegalArgumentException("Status cannot be null");
+        }
+        this.participateStatus = newStatus;
+    }
 }
