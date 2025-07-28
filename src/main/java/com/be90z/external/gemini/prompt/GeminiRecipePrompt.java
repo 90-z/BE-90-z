@@ -33,9 +33,9 @@ public class GeminiRecipePrompt {
             
                         === 재료 추출 주의사항 ===
                         - 실제로 언급된 재료만 포함 (추측하지 말 것)
-                        - 개수가 명시되지 않은 경우 합리적으로 추정 (예: "소금 약간" → 1)
+                        - ingredientsCount는 **반드시 1 이상의 정수만 사용** (분수, 소수점, 1/2 등 금지)
+                        - "1/2컵", "반컵", "약간" 등은 모두 1로 변환
                         - 조미료도 포함 (소금, 후추, 기름 등)
-                        - ingredientsCount는 반드시 1 이상의 정수
                         
                         === 예시 ===
             
@@ -88,6 +88,7 @@ public class GeminiRecipePrompt {
                         - ```json으로 시작하는 마크다운 코드 블록 사용 금지
                         - ```로 감싸는 것 금지
                         - 추가 설명이나 텍스트 금지
+                        - ingredientsCount는 반드시 정수만 사용 (1, 2, 3... 분수 금지)
                         - 오직 순수한 JSON 객체만 응답
                         
                         올바른 응답 형태:
@@ -101,7 +102,7 @@ public class GeminiRecipePrompt {
                             "ingredientsList": [
                                 {
                                     "ingredientName": "재료명",
-                                    "ingredientsCount": 개수
+                                    "ingredientsCount": 정수만_사용
                                 }
                             ]
                         }
