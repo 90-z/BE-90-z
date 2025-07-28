@@ -50,24 +50,20 @@ public class Recipe {
     public Recipe(String recipeName, String recipeContent) {
         this.recipeName = recipeName;
         this.recipeContent = recipeContent;
-        this.recipeCalories = recipeCalories;
-        this.recipePeople = recipePeople;
-        this.recipeTime = recipeTime;
-        this.recipeCookMethod = recipeCookMethod;
-        this.user = user;
+        this.createdAt = LocalDateTime.now();
+        this.ingredients = new ArrayList<>();
     }
 
-    // 새로 추가할 생성자 (User 없음) - test 버전
     public Recipe(String recipeName, String recipeContent, Integer recipeCalories,
                   String recipeCookMethod, RecipePeople recipePeople,
-                  Integer recipeTime) {
+                  Integer recipeTime, User user) {
         this.recipeName = recipeName;
         this.recipeContent = recipeContent;
         this.recipeCalories = recipeCalories;
+        this.recipeCookMethod = recipeCookMethod;
         this.recipePeople = recipePeople;
         this.recipeTime = recipeTime;
-        this.recipeCookMethod = recipeCookMethod;
-        this.user = null;
+        this.user = user;
     }
 
     //    재료 추가 메서드
