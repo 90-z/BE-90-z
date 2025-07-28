@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface RaffleEntryRepository extends JpaRepository<RaffleEntry, RaffleEntryId> {
@@ -29,4 +30,12 @@ public interface RaffleEntryRepository extends JpaRepository<RaffleEntry, Raffle
     // TDD - 날짜 범위별 중복 제거된 래플 참여자 수 조회
     @Query("SELECT COUNT(DISTINCT re.participation.user.userId) FROM RaffleEntry re WHERE re.createdAt BETWEEN :startDate AND :endDate")
     int countDistinctByCreatedAtBetween(@Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate);
+    
+    // 월간 래플 추첨을 위한 활성 참가자 조회
+    @Query("SELECT re FROM RaffleEntry re WHERE re.raffleDate <= CURRENT_TIMESTAMP")
+    List<RaffleEntry> findAllActiveEntries();
+    
+    
+    // 사용자의 마지막 래플 참가 정보 조회
+    Optional<RaffleEntry> findTopByParticipation_User_UserIdOrderByCreatedAtDesc(Long userId);
 }
