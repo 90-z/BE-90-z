@@ -1,13 +1,21 @@
 package com.be90z.domain.raffle.controller;
 
+import com.be90z.domain.raffle.dto.request.PrizeClaimReqDTO;
+import com.be90z.domain.raffle.dto.response.PrizeClaimResDTO;
 import com.be90z.domain.raffle.dto.response.RaffleStatusResDTO;
+import com.be90z.domain.raffle.dto.response.WinnerHistoryResDTO;
+import com.be90z.domain.raffle.service.PrizeClaimService;
 import com.be90z.domain.raffle.service.RaffleService;
+import com.be90z.domain.raffle.service.WinnerHistoryService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -22,7 +30,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(RaffleController.class)
-@DisplayName("래플 컨트롤러 테스트")
+@DisplayName("래플 통합 컨트롤러 테스트")
 class RaffleControllerTest {
 
     @Autowired
@@ -33,6 +41,12 @@ class RaffleControllerTest {
 
     @MockBean
     private RaffleService raffleService;
+    
+    @MockBean
+    private PrizeClaimService prizeClaimService;
+    
+    @MockBean
+    private WinnerHistoryService winnerHistoryService;
 
     @Test
     @DisplayName("래플 상태 조회 API 테스트")
@@ -49,7 +63,7 @@ class RaffleControllerTest {
         when(raffleService.getRaffleStatus(userId)).thenReturn(mockResponse);
 
         // when & then
-        mockMvc.perform(get("/api/raffle/status")
+        mockMvc.perform(get("/api/v1/raffle/status")
                 .param("userId", userId.toString())
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -69,7 +83,7 @@ class RaffleControllerTest {
         when(raffleService.joinRaffle(userId, missionId)).thenReturn(true);
 
         // when & then
-        mockMvc.perform(post("/api/raffle/join")
+        mockMvc.perform(post("/api/v1/raffle/entries")
                 .param("userId", userId.toString())
                 .param("missionId", missionId.toString())
                 .contentType(MediaType.APPLICATION_JSON))
@@ -86,14 +100,17 @@ class RaffleControllerTest {
         when(raffleService.getMonthlyWinners()).thenReturn(mockWinners);
 
         // when & then
-        mockMvc.perform(get("/api/raffle/winners")
+        mockMvc.perform(get("/api/v1/raffle/winners")
+                .param("period", "current")
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$").isArray())
-                .andExpect(jsonPath("$.length()").value(3))
-                .andExpect(jsonPath("$[0]").value("User1"))
-                .andExpect(jsonPath("$[1]").value("User2"))
-                .andExpect(jsonPath("$[2]").value("User3"));
+                .andExpect(jsonPath("$.period").value("current"))
+                .andExpect(jsonPath("$.winners").isArray())
+                .andExpect(jsonPath("$.winners.length()").value(3))
+                .andExpect(jsonPath("$.winners[0]").value("User1"))
+                .andExpect(jsonPath("$.winners[1]").value("User2"))
+                .andExpect(jsonPath("$.winners[2]").value("User3"))
+                .andExpect(jsonPath("$.count").value(3));
     }
 
     @Test
@@ -106,7 +123,7 @@ class RaffleControllerTest {
         when(raffleService.joinRaffle(userId, missionId)).thenReturn(false);
 
         // when & then
-        mockMvc.perform(post("/api/raffle/join")
+        mockMvc.perform(post("/api/v1/raffle/entries")
                 .param("userId", userId.toString())
                 .param("missionId", missionId.toString())
                 .contentType(MediaType.APPLICATION_JSON))
@@ -116,10 +133,113 @@ class RaffleControllerTest {
     }
 
     @Test
+    @DisplayName("통합 래플 당첨자 내역 조회 - 페이징")
+    void shouldGetWinnerHistoryWithPagination() throws Exception {
+        // given
+        WinnerHistoryResDTO winner1 = WinnerHistoryResDTO.builder()
+            .winnerCode(1L)
+            .userName("User1")
+            .prizeName("Gift Card")
+            .winDate(LocalDateTime.now())
+            .claimed(false)
+            .build();
+            
+        List<WinnerHistoryResDTO> winners = Arrays.asList(winner1);
+        Page<WinnerHistoryResDTO> winnerPage = new PageImpl<>(winners, PageRequest.of(0, 20), 1);
+        
+        when(winnerHistoryService.getAllWinnerHistory(any())).thenReturn(winnerPage);
+
+        // when & then
+        mockMvc.perform(get("/api/v1/raffle/winners")
+                .param("period", "history")
+                .param("page", "0")
+                .param("size", "20")
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content").isArray())
+                .andExpect(jsonPath("$.content[0].winnerCode").value(1))
+                .andExpect(jsonPath("$.content[0].userName").value("User1"));
+    }
+
+    @Test
+    @DisplayName("사용자별 당첨 내역 조회")
+    void shouldGetUserWinnerHistory() throws Exception {
+        // given
+        Long userId = 1L;
+        WinnerHistoryResDTO winner = WinnerHistoryResDTO.builder()
+            .winnerCode(1L)
+            .userName("User1")
+            .prizeName("Gift Card")
+            .winDate(LocalDateTime.now())
+            .claimed(true)
+            .build();
+            
+        when(winnerHistoryService.getWinnerHistoryByUserId(userId)).thenReturn(Arrays.asList(winner));
+
+        // when & then
+        mockMvc.perform(get("/api/v1/raffle/winners")
+                .param("period", "history")
+                .param("userId", userId.toString())
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.period").value("history"))
+                .andExpect(jsonPath("$.userId").value(1))
+                .andExpect(jsonPath("$.winners").isArray())
+                .andExpect(jsonPath("$.winners[0].winnerCode").value(1));
+    }
+
+    @Test
+    @DisplayName("상품 수령 API 테스트")
+    void shouldClaimPrize() throws Exception {
+        // given
+        Long winnerId = 1L;
+        PrizeClaimReqDTO request = PrizeClaimReqDTO.builder()
+            .userId(1L)
+            .claimMethod("DOWNLOAD")
+            .build();
+            
+        PrizeClaimResDTO response = PrizeClaimResDTO.builder()
+            .winnerCode(winnerId)
+            .claimed(true)
+            .claimDate(LocalDateTime.now())
+            .prizeName("Gift Card")
+            .giftCardDownloadUrl("/api/v1/raffle/winners/1/downloads?token=abc123")
+            .build();
+            
+        when(prizeClaimService.claimPrize(any(PrizeClaimReqDTO.class))).thenReturn(response);
+
+        // when & then
+        mockMvc.perform(post("/api/v1/raffle/winners/{winnerId}/claims", winnerId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.winnerCode").value(1))
+                .andExpect(jsonPath("$.claimed").value(true))
+                .andExpect(jsonPath("$.prizeName").value("Gift Card"));
+    }
+
+    @Test
+    @DisplayName("기프트카드 다운로드 API 테스트")
+    void shouldDownloadGiftCard() throws Exception {
+        // given
+        Long winnerId = 1L;
+        String token = "valid-token";
+        byte[] giftCardData = "GIFT_CARD_DATA".getBytes();
+        
+        when(prizeClaimService.downloadGiftCard(winnerId, token)).thenReturn(giftCardData);
+
+        // when & then
+        mockMvc.perform(get("/api/v1/raffle/winners/{winnerId}/downloads", winnerId)
+                .param("token", token))
+                .andExpect(status().isOk())
+                .andExpect(content().bytes(giftCardData));
+    }
+
+    @Test
     @DisplayName("잘못된 파라미터로 요청 시 400 에러 반환")
     void shouldReturn400ForInvalidParameters() throws Exception {
         // when & then
-        mockMvc.perform(post("/api/raffle/join")
+        mockMvc.perform(post("/api/v1/raffle/entries")
                 .param("userId", "invalid")
                 .param("missionId", "invalid")
                 .contentType(MediaType.APPLICATION_JSON))
@@ -141,7 +261,7 @@ class RaffleControllerTest {
         when(raffleService.getRaffleStatus(userId)).thenReturn(participatingStatus);
 
         // when & then - 배치 처리 후 참여 상태가 유지되고 있음을 확인
-        mockMvc.perform(get("/api/raffle/status")
+        mockMvc.perform(get("/api/v1/raffle/status")
                 .param("userId", userId.toString())
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -164,7 +284,7 @@ class RaffleControllerTest {
         when(raffleService.getRaffleStatus(userId)).thenReturn(updatedStatus);
 
         // when & then
-        mockMvc.perform(get("/api/raffle/status")
+        mockMvc.perform(get("/api/v1/raffle/status")
                 .param("userId", userId.toString())
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -183,7 +303,7 @@ class RaffleControllerTest {
         when(raffleService.joinRaffle(userId, missionId)).thenReturn(true);
 
         // when & then - 래플 참여 API만 제공되고 취소 API는 제공하지 않음
-        mockMvc.perform(post("/api/raffle/join")
+        mockMvc.perform(post("/api/v1/raffle/entries")
                 .param("userId", userId.toString())
                 .param("missionId", missionId.toString())
                 .contentType(MediaType.APPLICATION_JSON))
@@ -191,7 +311,7 @@ class RaffleControllerTest {
                 .andExpect(jsonPath("$.success").value(true));
 
         // 취소 API는 존재하지 않아야 함 (404 반환 예상)
-        mockMvc.perform(delete("/api/raffle/cancel")
+        mockMvc.perform(delete("/api/v1/raffle/cancel")
                 .param("userId", userId.toString())
                 .param("missionId", missionId.toString())
                 .contentType(MediaType.APPLICATION_JSON))
