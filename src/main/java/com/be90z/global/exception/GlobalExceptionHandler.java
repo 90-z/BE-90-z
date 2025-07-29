@@ -1,6 +1,7 @@
 package com.be90z.global.exception;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -49,5 +50,12 @@ public class GlobalExceptionHandler {
                 .code("INTERNAL_ERROR")
                 .build();
         return ResponseEntity.internalServerError().body(errorResponse);
+    }
+
+    @ExceptionHandler(JsonParsingException.class)
+    public ResponseEntity<ErrorResponse> handleJsonParsingException(JsonParsingException e) {
+        log.error("JSON 파싱 에러: ", e);
+        ErrorResponse errorResponse = new ErrorResponse("JSON_PARSING_ERROR", e.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
     }
 }
