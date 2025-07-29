@@ -9,7 +9,9 @@ import com.be90z.domain.recipe.entity.ImageCategory;
 import com.be90z.domain.recipe.entity.Ingredients;
 import com.be90z.domain.recipe.entity.Recipe;
 import com.be90z.domain.recipe.repository.RecipeRepository;
+import com.be90z.domain.tag.service.TagService;
 import com.be90z.domain.user.repository.UserRepository;
+import com.be90z.external.gemini.service.GeminiResParser;
 import com.be90z.external.gemini.service.GeminiService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +31,8 @@ public class RecipeService {
     private final GeminiService geminiService;
     private final ImageService imageService;
     private final UserRepository userRepository;
+    private final TagService tagService;
+    private final GeminiResParser geminiResParser;
 
     //   AI로 레시피 분석
     @Transactional
@@ -39,9 +43,10 @@ public class RecipeService {
         );
 
 //        AI 결과 Json > DTO 변환
-        ObjectMapper objectMapper = new ObjectMapper();
-        RecipeAiResDTO recipeAiResDTO = objectMapper.readValue(geminiResJson, RecipeAiResDTO.class);
-        return recipeAiResDTO;
+//        ObjectMapper objectMapper = new ObjectMapper();
+//        RecipeAiResDTO recipeAiResDTO = objectMapper.readValue(geminiResJson, RecipeAiResDTO.class);
+//        return recipeAiResDTO;
+        return geminiResParser.parseReponse(geminiResJson, RecipeAiResDTO.class);
     }
 
     //    레시피 등록 - ai 후
@@ -53,6 +58,13 @@ public class RecipeService {
         // 🔥 실제 User 객체 조회
         com.be90z.domain.user.entity.User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다: " + userId));
+
+//        요리방식 유효성 검증
+        if(recipeAiResDTO.getRecipeCookMethod() != null &&
+        !recipeAiResDTO.getRecipeCookMethod().trim().isEmpty() &&
+        !tagService.isValidTag(recipeAiResDTO.getRecipeCookMethod())) {
+            throw new RuntimeException("유효하지 않는 요리방식입니다.: " + recipeAiResDTO.getRecipeCookMethod());
+        }
 
         Recipe recipe = new Recipe(
                 recipeAiResDTO.getRecipeName(),
@@ -118,6 +130,13 @@ public class RecipeService {
      if (!recipe.getUser().getUserId().equals(getCurrentUser().getUserId())) {
          throw new RuntimeException("레시피 수정 권한이 없습니다.");
      } */
+
+        //        요리방식 유효성 검증
+        if(recipeUpdateDTO.getRecipeCookMethod() != null &&
+                !recipeUpdateDTO.getRecipeCookMethod().trim().isEmpty() &&
+                !tagService.isValidTag(recipeUpdateDTO.getRecipeCookMethod())) {
+            throw new RuntimeException("유효하지 않는 요리방식입니다.: " + recipeUpdateDTO.getRecipeCookMethod());
+        }
 
         // 1. 레시피 기본 정보 수정
         recipe.updateRecipe(
@@ -208,7 +227,7 @@ public class RecipeService {
 
 
     //    Recipe Entity를 ResponseDTO로 변환하는 메서드
-    private RecipeResDTO convertToResponseDTO(Recipe recipe) {
+    public RecipeResDTO convertToResponseDTO(Recipe recipe) {
         RecipeResDTO recipeResDTO = new RecipeResDTO();
         recipeResDTO.setRecipeCode(recipe.getRecipeCode());
         recipeResDTO.setRecipeName(recipe.getRecipeName());
