@@ -1,6 +1,7 @@
 package com.be90z.domain.recipe.dto;
 
 import com.be90z.domain.recipe.entity.RecipePeople;
+import com.be90z.domain.recipeTag.dto.RecipeTagResDTO;
 import jakarta.persistence.Lob;
 import lombok.Data;
 
@@ -11,6 +12,9 @@ import java.util.List;
 public class RecipeResDTO {
     private Long recipeCode;
     private String recipeName;
+    private List<RecipeTagResDTO> recipeTagList;
+
+
     @Lob
     private String recipeContent;
     private Integer recipeCalories;
@@ -33,5 +37,16 @@ public class RecipeResDTO {
         private Long imgCode;
         private String imgName;
         private String imgS3url;
+    }
+
+    @Data
+    public static class RecipeTagResDTO {
+        private Long recipeTagCode;
+        private String tagName;
+
+        public RecipeTagResDTO(Long recipeTagCode, String tagName) {
+            this.recipeTagCode = recipeTagCode;
+            this.tagName = tagName;
+        }
     }
 }
