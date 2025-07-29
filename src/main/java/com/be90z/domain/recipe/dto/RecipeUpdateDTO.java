@@ -9,6 +9,7 @@ import java.util.List;
 @Data
 public class RecipeUpdateDTO {
     private String recipeName;
+    private List<String> selectedTags; // 사용자가 선택한 태그
     @Lob
     private String recipeContent;
     private Integer recipeCalories;
