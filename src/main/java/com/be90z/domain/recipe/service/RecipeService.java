@@ -11,6 +11,7 @@ import com.be90z.domain.recipe.entity.Recipe;
 import com.be90z.domain.recipe.repository.RecipeRepository;
 import com.be90z.domain.tag.service.TagService;
 import com.be90z.domain.user.repository.UserRepository;
+import com.be90z.external.gemini.service.GeminiResParser;
 import com.be90z.external.gemini.service.GeminiService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -31,6 +32,7 @@ public class RecipeService {
     private final ImageService imageService;
     private final UserRepository userRepository;
     private final TagService tagService;
+    private final GeminiResParser geminiResParser;
 
     //   AI로 레시피 분석
     @Transactional
@@ -41,9 +43,10 @@ public class RecipeService {
         );
 
 //        AI 결과 Json > DTO 변환
-        ObjectMapper objectMapper = new ObjectMapper();
-        RecipeAiResDTO recipeAiResDTO = objectMapper.readValue(geminiResJson, RecipeAiResDTO.class);
-        return recipeAiResDTO;
+//        ObjectMapper objectMapper = new ObjectMapper();
+//        RecipeAiResDTO recipeAiResDTO = objectMapper.readValue(geminiResJson, RecipeAiResDTO.class);
+//        return recipeAiResDTO;
+        return geminiResParser.parseReponse(geminiResJson, RecipeAiResDTO.class);
     }
 
     //    레시피 등록 - ai 후
