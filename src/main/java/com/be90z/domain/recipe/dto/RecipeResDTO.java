@@ -19,11 +19,19 @@ public class RecipeResDTO {
     private Integer recipeTime;
     private LocalDateTime createdAt;
     private List<IngredientsResDTO> ingredientsList;
+    private List<ImageResDTO> imagesList;
 
     @Data
     public static class IngredientsResDTO {
         private Long ingredientsCode;
         private String ingredientsName;
         private Integer ingredientsCount;
+    }
+
+    @Data
+    public static class ImageResDTO {
+        private Long imgCode;
+        private String imgName;
+        private String imgS3url;
     }
 }

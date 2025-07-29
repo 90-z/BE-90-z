@@ -15,9 +15,9 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-
 import java.time.LocalDateTime;
 import java.util.Map;
+
 
 @Slf4j
 @Service
@@ -173,7 +173,7 @@ public class AuthUserService {
         return userRepository.findByProvider(kakaoId)
                 .map(existingUser -> {
                     // 기존 사용자 정보 업데이트
-                    log.info("기존 사용자 정보 업데이트: {}", existingUser.getNickname());
+//                    log.info("기존 사용자 정보 업데이트: {}", existingUser.getNickname());
 
                     // 필요시 정보 업데이트 로직 추가
                     // existingUser.updateNickname(kakaoUserResDTO.getNickname());
@@ -191,7 +191,7 @@ public class AuthUserService {
                             .email(kakaoUserResDTO.getEmail())
                             .gender(Gender.valueOf(convertGender(kakaoUserResDTO.getGender())))
                             .birth(kakaoUserResDTO.getBirthYear())
-                            .auth(Auth.valueOf("USER"))  // 기본값
+//                            .auth(Auth.USER)  // 기본값
                             .createdAt(LocalDateTime.now())
                             .build();
 

@@ -19,7 +19,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/**").permitAll() // 개발환경에서는 API 접근 허용
                 .anyRequest().authenticated()
             );
-        
+
         return http.build();
     }
 }
