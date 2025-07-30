@@ -2,11 +2,13 @@ package com.be90z.domain.mission.service;
 
 import com.be90z.domain.mission.dto.request.MissionCreateReqDTO;
 import com.be90z.domain.mission.dto.request.MissionJoinReqDTO;
+import com.be90z.domain.mission.dto.request.MissionReplyReqDTO;
 import com.be90z.domain.mission.dto.request.MissionUpdateReqDTO;
 import com.be90z.domain.mission.dto.response.MissionCreateResDTO;
 import com.be90z.domain.mission.dto.response.MissionDetailResDTO;
 import com.be90z.domain.mission.dto.response.MissionJoinResDTO;
 import com.be90z.domain.mission.dto.response.MissionListResDTO;
+import com.be90z.domain.mission.dto.response.MissionReplyResDTO;
 import com.be90z.domain.mission.entity.Mission;
 import com.be90z.domain.mission.entity.MissionParticipation;
 import com.be90z.domain.mission.entity.ParticipateStatus;
@@ -18,6 +20,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -176,6 +179,7 @@ public class MissionService {
         }
         
         mission.updateMission(
+            null, // missionName은 updateMission에서 따로 업데이트 안함
             request.getMissionContent(),
             request.getMissionGoalCount(),
             request.getStartDate(),
@@ -216,5 +220,58 @@ public class MissionService {
         // 미션 삭제 (연관된 참여 데이터도 함께 삭제됨)
         missionParticipationRepository.deleteByMission(mission);
         missionRepository.delete(mission);
+    }
+
+    @Transactional
+    public MissionReplyResDTO replyToMission(Long missionCode, MissionReplyReqDTO request) {
+        // 입력 유효성 검증
+        if (missionCode == null) {
+            throw new IllegalArgumentException("Mission code cannot be null");
+        }
+        if (request == null) {
+            throw new IllegalArgumentException("Request cannot be null");
+        }
+        
+        // 미션 조회
+        Mission mission = missionRepository.findById(missionCode)
+                .orElseThrow(() -> new IllegalArgumentException("Mission not found with code: " + missionCode));
+        
+        // 고유한 댓글 코드 생성
+        Long replyCode = System.currentTimeMillis() + (long)(Math.random() * 1000);
+        
+        // 현재 시간으로 생성 시간 설정
+        LocalDateTime createdAt = LocalDateTime.now();
+        
+        // 응답 DTO 생성
+        return MissionReplyResDTO.builder()
+                .replyCode(replyCode)
+                .missionCode(missionCode)
+                .missionName(request.getMissionName())
+                .missionContent(request.getMissionContent())
+                .createdAt(createdAt)
+                .build();
+    }
+
+    /**
+     * 전체 활성 미션 조회 (명세: GET api/v1/mission)
+     */
+    public List<MissionListResDTO> getAllActiveMissions() {
+        List<Mission> activeMissions = missionRepository.findByMissionStatusOrderByCreatedAtDesc(
+            com.be90z.domain.mission.entity.MissionStatus.ACTIVE
+        );
+        
+        return activeMissions.stream()
+                .map(mission -> MissionListResDTO.builder()
+                        .missionCode(mission.getMissionCode())
+                        .missionName(mission.getMissionName())
+                        .missionContent(mission.getMissionContent())
+                        .missionStatus(mission.getMissionStatus().name())
+                        .missionGoalCount(mission.getMissionGoalCount())
+                        .maxParticipants(mission.getMaxParticipants())
+                        .startDate(mission.getStartDate())
+                        .endDate(mission.getEndDate())
+                        .currentParticipants(0) // TODO: 실제 참여자 수 계산 로직 추가
+                        .build())
+                .toList();
     }
 }

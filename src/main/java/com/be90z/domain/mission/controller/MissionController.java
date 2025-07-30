@@ -2,11 +2,13 @@ package com.be90z.domain.mission.controller;
 
 import com.be90z.domain.mission.dto.request.MissionCreateReqDTO;
 import com.be90z.domain.mission.dto.request.MissionJoinReqDTO;
+import com.be90z.domain.mission.dto.request.MissionReplyReqDTO;
 import com.be90z.domain.mission.dto.request.MissionUpdateReqDTO;
 import com.be90z.domain.mission.dto.response.MissionCreateResDTO;
 import com.be90z.domain.mission.dto.response.MissionDetailResDTO;
 import com.be90z.domain.mission.dto.response.MissionJoinResDTO;
 import com.be90z.domain.mission.dto.response.MissionListResDTO;
+import com.be90z.domain.mission.dto.response.MissionReplyResDTO;
 import com.be90z.domain.mission.service.MissionService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -36,7 +38,7 @@ public class MissionController {
             @ApiResponse(responseCode = "500", description = "서버 에러")
     })
     public ResponseEntity<List<MissionListResDTO>> getActiveMissions() {
-        List<MissionListResDTO> response = missionService.getActiveMissions();
+        List<MissionListResDTO> response = missionService.getAllActiveMissions();
         return ResponseEntity.ok(response);
     }
 
@@ -151,6 +153,30 @@ public class MissionController {
             return ResponseEntity.notFound().build();
         } catch (IllegalStateException e) {
             return ResponseEntity.status(409).build(); // Conflict
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    @PostMapping("/{missionCode}/reply")
+    @Operation(summary = "미션 댓글 등록", description = "특정 미션에 댓글을 등록합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "댓글 등록 성공"),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청"),
+            @ApiResponse(responseCode = "404", description = "미션을 찾을 수 없음"),
+            @ApiResponse(responseCode = "500", description = "서버 에러")
+    })
+    public ResponseEntity<MissionReplyResDTO> replyToMission(
+            @Parameter(description = "미션 코드", required = true, example = "1")
+            @PathVariable Long missionCode,
+            @Parameter(description = "미션 댓글 등록 정보", required = true)
+            @Valid @RequestBody MissionReplyReqDTO request) {
+        
+        try {
+            MissionReplyResDTO response = missionService.replyToMission(missionCode, request);
+            return ResponseEntity.ok(response);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
         } catch (Exception e) {
             return ResponseEntity.internalServerError().build();
         }
