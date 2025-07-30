@@ -7,7 +7,6 @@ import com.be90z.domain.mission.entity.MissionStatus;
 import com.be90z.domain.mission.entity.ParticipateStatus;
 import com.be90z.domain.user.entity.User;
 import com.be90z.domain.user.entity.UserAuthority;
-import com.be90z.domain.user.entity.Gender;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
 import static org.assertj.core.api.Assertions.*;
@@ -28,8 +27,6 @@ class RaffleEntryTest {
                 .email("test@example.com")
                 .auth(UserAuthority.USER)
                 .createdAt(LocalDateTime.now())
-                .gender(Gender.WOMAN)
-                .birth(1990)
                 .build();
 
         Challenge challenge = Challenge.builder()
@@ -42,7 +39,6 @@ class RaffleEntryTest {
 
         Mission mission = Mission.builder()
                 .missionCode(1L)
-                .challenge(challenge)
                 .missionName("테스트 미션")
                 .missionContent("테스트 미션 내용")
                 .missionStatus(MissionStatus.ACTIVE)

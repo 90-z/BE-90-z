@@ -1,119 +1,140 @@
 package com.be90z.domain.mission.entity;
 
 import com.be90z.domain.challenge.entity.Challenge;
-import org.junit.jupiter.api.Test;
+import com.be90z.domain.challenge.entity.ChallengeStatus;
 import org.junit.jupiter.api.DisplayName;
-import static org.assertj.core.api.Assertions.*;
+import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @DisplayName("Mission 엔티티 테스트")
 class MissionTest {
 
     @Test
-    @DisplayName("Mission 엔티티 생성 테스트")
-    void createMission() {
+    @DisplayName("Mission 엔티티 생성 - 성공")
+    void createMission_Success() {
         // given
         Challenge challenge = Challenge.builder()
                 .challengeName("다이어트 챌린지")
                 .challengeDescription("건강한 다이어트를 위한 챌린지")
+                .challengeStatus(ChallengeStatus.ACTIVE)
                 .startDate(LocalDateTime.now())
                 .endDate(LocalDateTime.now().plusDays(30))
                 .build();
-        
-        Long missionCode = 1L;
+
         String missionName = "일일 운동하기";
         String missionContent = "하루 30분 이상 운동하기";
         MissionStatus missionStatus = MissionStatus.ACTIVE;
-        Integer missionMax = 100;
+        Integer maxParticipants = 100;
         LocalDateTime startDate = LocalDateTime.now();
-        LocalDateTime endDate = LocalDateTime.now().plusDays(30);
-        LocalDateTime createdAt = LocalDateTime.now();
+        LocalDateTime endDate = LocalDateTime.now().plusDays(7);
 
         // when
         Mission mission = Mission.builder()
-                .missionCode(missionCode)
-                .challenge(challenge)
                 .missionName(missionName)
                 .missionContent(missionContent)
                 .missionStatus(missionStatus)
-                .missionMax(missionMax)
+                .challenge(challenge)
+                .maxParticipants(maxParticipants)
                 .startDate(startDate)
                 .endDate(endDate)
-                .createdAt(createdAt)
                 .build();
 
         // then
-        assertThat(mission.getMissionCode()).isEqualTo(missionCode);
-        assertThat(mission.getChallenge()).isEqualTo(challenge);
         assertThat(mission.getMissionName()).isEqualTo(missionName);
         assertThat(mission.getMissionContent()).isEqualTo(missionContent);
         assertThat(mission.getMissionStatus()).isEqualTo(missionStatus);
-        assertThat(mission.getMissionMax()).isEqualTo(missionMax);
+        assertThat(mission.getChallenge()).isEqualTo(challenge);
+        assertThat(mission.getMaxParticipants()).isEqualTo(maxParticipants);
         assertThat(mission.getStartDate()).isEqualTo(startDate);
         assertThat(mission.getEndDate()).isEqualTo(endDate);
-        assertThat(mission.getCreatedAt()).isEqualTo(createdAt);
+        assertThat(mission.getCreatedAt()).isNotNull();
+        assertThat(mission.getMissionGoalCount()).isEqualTo(1); // 기본값
     }
 
     @Test
-    @DisplayName("Mission 필수 필드 검증")
-    void validateRequiredFields() {
+    @DisplayName("Mission 생성 - missionName null일 때 예외 발생")
+    void createMission_MissionNameNull_ThrowsException() {
         // given
         Challenge challenge = Challenge.builder()
                 .challengeName("테스트 챌린지")
                 .challengeDescription("테스트 설명")
+                .challengeStatus(ChallengeStatus.ACTIVE)
                 .startDate(LocalDateTime.now())
                 .endDate(LocalDateTime.now().plusDays(30))
                 .build();
-        
+
         // when & then
-        assertThatThrownBy(() -> {
-            Mission.builder()
-                    .challenge(challenge)
-                    .missionContent("테스트 미션")
-                    .missionStatus(MissionStatus.ACTIVE)
-                    // missionName 누락
-                    .build();
-        }).isInstanceOf(IllegalArgumentException.class)
-          .hasMessage("Mission name cannot be null");
-    }
-
-    @Test
-    @DisplayName("Mission과 Challenge 관계 테스트")
-    void missionChallengeRelationship() {
-        // given
-        Challenge challenge = Challenge.builder()
-                .challengeName("다이어트 챌린지")
-                .challengeDescription("건강한 다이어트를 위한 챌린지")
-                .startDate(LocalDateTime.now())
-                .endDate(LocalDateTime.now().plusDays(30))
-                .build();
-        
-        // when
-        Mission mission = Mission.builder()
-                .challenge(challenge)
-                .missionName("물 8잔 마시기")
-                .missionContent("하루에 물을 8잔 이상 마시기")
-                .startDate(LocalDateTime.now())
-                .endDate(LocalDateTime.now().plusDays(1))
-                .build();
-        
-        // then
-        assertThat(mission.getChallenge()).isEqualTo(challenge);
-    }
-
-    @Test
-    @DisplayName("챌린지가 null일 경우 예외가 발생한다")
-    void createMissionWithNullChallenge() {
-        // given & when & then
         assertThatThrownBy(() -> Mission.builder()
-                .challenge(null)
-                .missionName("미션명")
-                .missionContent("내용")
+                .missionName(null)
+                .missionContent("테스트 내용")
+                .challenge(challenge)
                 .startDate(LocalDateTime.now())
-                .endDate(LocalDateTime.now().plusDays(1))
+                .endDate(LocalDateTime.now().plusDays(7))
                 .build())
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("Challenge cannot be null");
+                .hasMessage("Mission name cannot be null");
+    }
+
+    @Test
+    @DisplayName("Mission 생성 - missionContent null일 때 예외 발생")
+    void createMission_MissionContentNull_ThrowsException() {
+        // given
+        Challenge challenge = Challenge.builder()
+                .challengeName("테스트 챌린지")
+                .challengeDescription("테스트 설명")
+                .challengeStatus(ChallengeStatus.ACTIVE)
+                .startDate(LocalDateTime.now())
+                .endDate(LocalDateTime.now().plusDays(30))
+                .build();
+
+        // when & then
+        assertThatThrownBy(() -> Mission.builder()
+                .missionName("테스트 미션")
+                .missionContent(null)
+                .challenge(challenge)
+                .startDate(LocalDateTime.now())
+                .endDate(LocalDateTime.now().plusDays(7))
+                .build())
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Mission content cannot be null");
+    }
+
+    @Test
+    @DisplayName("Mission 업데이트 테스트")
+    void updateMission() {
+        // given
+        Challenge challenge = Challenge.builder()
+                .challengeName("테스트 챌린지")
+                .challengeDescription("테스트 설명")
+                .challengeStatus(ChallengeStatus.ACTIVE)
+                .startDate(LocalDateTime.now())
+                .endDate(LocalDateTime.now().plusDays(30))
+                .build();
+
+        Mission mission = Mission.builder()
+                .missionName("원래 미션")
+                .missionContent("원래 내용")
+                .missionStatus(MissionStatus.ACTIVE)
+                .challenge(challenge)
+                .maxParticipants(50)
+                .startDate(LocalDateTime.now())
+                .endDate(LocalDateTime.now().plusDays(7))
+                .build();
+        
+        String newMissionName = "수정된 미션";
+        String newMissionContent = "수정된 내용";
+        Integer newMaxParticipants = 100;
+        
+        // when
+        mission.updateMission(newMissionName, newMissionContent, null, null, null, newMaxParticipants);
+        
+        // then
+        assertThat(mission.getMissionName()).isEqualTo(newMissionName);
+        assertThat(mission.getMissionContent()).isEqualTo(newMissionContent);
+        assertThat(mission.getMaxParticipants()).isEqualTo(newMaxParticipants);
     }
 }

@@ -47,7 +47,7 @@ class MissionControllerTest {
                 .missionName("매일 물 8잔 마시기")
                 .missionContent("하루에 물 8잔을 마시고 인증샷을 올려주세요")
                 .missionStatus("ACTIVE")
-                .missionMax(100)
+                .maxParticipants(100)
                 .startDate(LocalDateTime.of(2025, 7, 1, 0, 0))
                 .endDate(LocalDateTime.of(2025, 7, 31, 23, 59))
                 .currentParticipants(45)
@@ -58,17 +58,17 @@ class MissionControllerTest {
                 .missionName("운동하기")
                 .missionContent("매일 30분 운동하기")
                 .missionStatus("ACTIVE")
-                .missionMax(50)
+                .maxParticipants(50)
                 .startDate(LocalDateTime.of(2025, 7, 1, 0, 0))
                 .endDate(LocalDateTime.of(2025, 7, 31, 23, 59))
                 .currentParticipants(20)
                 .build();
 
         List<MissionListResDTO> mockResponse = List.of(mission1, mission2);
-        given(missionService.getActiveMissions()).willReturn(mockResponse);
+        given(missionService.getAllActiveMissions()).willReturn(mockResponse);
 
         // when & then
-        mockMvc.perform(get("/api/mission/list")
+        mockMvc.perform(get("/api/v1/mission")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -101,7 +101,7 @@ class MissionControllerTest {
         given(missionService.joinMission(any(MissionJoinReqDTO.class))).willReturn(mockResponse);
 
         // when & then
-        mockMvc.perform(post("/api/mission/join")
+        mockMvc.perform(post("/api/v1/mission/join")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request))
                         .with(csrf()))
@@ -126,7 +126,7 @@ class MissionControllerTest {
                 .willThrow(new IllegalArgumentException("User not found with id: 999"));
 
         // when & then
-        mockMvc.perform(post("/api/mission/join")
+        mockMvc.perform(post("/api/v1/mission/join")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request))
                         .with(csrf()))
@@ -146,7 +146,7 @@ class MissionControllerTest {
                 .willReturn("PART_COMPLETE");
 
         // when & then
-        mockMvc.perform(patch("/api/mission/status")
+        mockMvc.perform(patch("/api/v1/mission/status")
                         .param("userId", userId.toString())
                         .param("missionCode", missionCode.toString())
                         .param("status", newStatus)
@@ -170,7 +170,7 @@ class MissionControllerTest {
                 .willThrow(new IllegalArgumentException("User not participated in this mission"));
 
         // when & then
-        mockMvc.perform(patch("/api/mission/status")
+        mockMvc.perform(patch("/api/v1/mission/status")
                         .param("userId", userId.toString())
                         .param("missionCode", missionCode.toString())
                         .param("status", newStatus)
@@ -184,7 +184,7 @@ class MissionControllerTest {
     @DisplayName("미션 상태 변경 - 필수 파라미터 누락")
     void updateMissionStatus_MissingParameter_Returns400() throws Exception {
         // when & then
-        mockMvc.perform(patch("/api/mission/status")
+        mockMvc.perform(patch("/api/v1/mission/status")
                         .param("userId", "1")
                         .param("missionCode", "2")
                         // status 파라미터 누락

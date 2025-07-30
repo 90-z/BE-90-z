@@ -29,7 +29,8 @@ class MissionListResDTOTest {
                 .missionName(missionName)
                 .missionContent(missionContent)
                 .missionStatus(missionStatus)
-                .missionMax(missionMax)
+                .maxParticipants(missionMax)
+                .missionGoalCount(1)
                 .startDate(startDate)
                 .endDate(endDate)
                 .currentParticipants(currentParticipants)
@@ -40,7 +41,7 @@ class MissionListResDTOTest {
         assertThat(dto.getMissionName()).isEqualTo(missionName);
         assertThat(dto.getMissionContent()).isEqualTo(missionContent);
         assertThat(dto.getMissionStatus()).isEqualTo(missionStatus);
-        assertThat(dto.getMissionMax()).isEqualTo(missionMax);
+        assertThat(dto.getMaxParticipants()).isEqualTo(missionMax);
         assertThat(dto.getStartDate()).isEqualTo(startDate);
         assertThat(dto.getEndDate()).isEqualTo(endDate);
         assertThat(dto.getCurrentParticipants()).isEqualTo(currentParticipants);
@@ -55,6 +56,8 @@ class MissionListResDTOTest {
                 .missionName("테스트 미션")
                 .missionContent("테스트 내용")
                 .missionStatus("ACTIVE")
+                .missionGoalCount(1)
+                .maxParticipants(50)
                 .startDate(LocalDateTime.now())
                 .endDate(LocalDateTime.now().plusDays(7))
                 .build();

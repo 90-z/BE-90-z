@@ -5,6 +5,12 @@ import com.be90z.domain.raffle.entity.RaffleWinner;
 import com.be90z.domain.raffle.repository.RaffleEntryRepository;
 import com.be90z.domain.raffle.repository.RaffleWinnerRepository;
 import com.be90z.domain.raffle.service.RaffleDrawService;
+import com.be90z.domain.mission.entity.MissionParticipation;
+import com.be90z.domain.mission.entity.Mission;
+import com.be90z.domain.mission.entity.MissionStatus;
+import com.be90z.domain.mission.entity.ParticipateStatus;
+import com.be90z.domain.user.entity.User;
+import com.be90z.domain.user.entity.UserAuthority;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -189,8 +195,36 @@ class MonthlyRaffleSchedulerTest {
     }
 
     private RaffleEntry createRaffleEntry(Long raffleCode, Long participateCode) {
+        // Mock entities for test
+        User mockUser = User.builder()
+            .userId(participateCode)
+            .provider("kakao")
+            .nickname("테스트유저" + participateCode)
+            .email("test" + participateCode + "@example.com")
+            .auth(UserAuthority.USER)
+            .createdAt(LocalDateTime.now())
+            .build();
+
+        Mission mockMission = Mission.builder()
+            .missionCode(1L)
+            .missionName("테스트 미션")
+            .missionContent("테스트 미션 내용")
+            .missionStatus(MissionStatus.ACTIVE)
+            .startDate(LocalDateTime.now())
+            .endDate(LocalDateTime.now().plusDays(7))
+            .createdAt(LocalDateTime.now())
+            .build();
+
+        MissionParticipation mockParticipation = MissionParticipation.builder()
+            .participateCode(participateCode)
+            .participateStatus(ParticipateStatus.PART_COMPLETE)
+            .user(mockUser)
+            .mission(mockMission)
+            .build();
+        
         return RaffleEntry.builder()
             .raffleCode(raffleCode)
+            .participation(mockParticipation)
             .raffleName("Test Raffle")
             .raffleDate(LocalDateTime.now())
             .createdAt(LocalDateTime.now())
