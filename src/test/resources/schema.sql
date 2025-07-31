@@ -1,4 +1,4 @@
--- H2용 테스트 스키마 생성 (실제 MariaDB 스키마 기준)
+-- H2용 테스트 스키마 생성 (실제 MariaDB 스키마와 일치)
 
 CREATE TABLE IF NOT EXISTS `user` (
     user_id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS `user` (
     nickname VARCHAR(255) NOT NULL,
     email VARCHAR(255) NOT NULL,
     auth VARCHAR(20) NOT NULL DEFAULT 'user',
-    created_at TIMESTAMP NOT NULL,
+    created_at DATETIME NOT NULL,
     gender VARCHAR(10) NOT NULL,
     birth INT NOT NULL
 );
@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS recipe (
     recipe_name VARCHAR(255) NOT NULL,
     recipe_made TEXT NOT NULL,
     recipe_content TEXT NOT NULL,
-    created_at TIMESTAMP NOT NULL,
+    created_at DATETIME NOT NULL,
     user_id BIGINT NOT NULL,
     FOREIGN KEY (user_id) REFERENCES `user`(user_id)
 );
@@ -27,9 +27,9 @@ CREATE TABLE IF NOT EXISTS mission (
     mission_content TEXT NOT NULL,
     mission_status VARCHAR(20) NOT NULL,
     mission_max INT NULL,
-    start_date TIMESTAMP NOT NULL,
-    end_date TIMESTAMP NOT NULL,
-    created_at TIMESTAMP NOT NULL
+    start_date DATETIME NOT NULL,
+    end_date DATETIME NOT NULL,
+    created_at DATETIME NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS participate (
@@ -47,8 +47,8 @@ CREATE TABLE IF NOT EXISTS raffle (
     raffle_name VARCHAR(255) NOT NULL,
     raffle_prize_cont TEXT NULL,
     raffle_winner INT NOT NULL DEFAULT 1,
-    raffle_date TIMESTAMP NOT NULL,
-    created_at TIMESTAMP NULL,
+    raffle_date DATETIME NOT NULL,
+    created_at DATETIME NULL,
     PRIMARY KEY (raffle_code, participate_code),
     FOREIGN KEY (participate_code) REFERENCES participate(participate_code)
 );
@@ -71,7 +71,7 @@ CREATE TABLE IF NOT EXISTS image (
 CREATE TABLE IF NOT EXISTS bookmark (
     bookmark_code BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     bookmark_status VARCHAR(20) NOT NULL,
-    created_ate TIMESTAMP NOT NULL,
+    created_ate DATETIME NOT NULL,
     user_id BIGINT NOT NULL,
     recipe_code BIGINT NOT NULL,
     FOREIGN KEY (user_id) REFERENCES `user`(user_id),
@@ -107,6 +107,6 @@ CREATE TABLE IF NOT EXISTS simple_raffle (
     raffle_name VARCHAR(255) NOT NULL,
     raffle_prize_cont TEXT NULL,
     raffle_winner INT NOT NULL DEFAULT 1,
-    raffle_date TIMESTAMP NOT NULL,
-    created_at TIMESTAMP NULL
+    raffle_date DATETIME NOT NULL,
+    created_at DATETIME NULL
 );
