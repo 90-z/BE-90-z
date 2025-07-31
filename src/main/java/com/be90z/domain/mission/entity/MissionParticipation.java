@@ -22,8 +22,6 @@ public class MissionParticipation {
     @Column(name = "participate_status", nullable = false)
     private ParticipateStatus participateStatus;
     
-    @Column(name = "participate_count", nullable = false)
-    private Integer participateCount = 0;
     
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
@@ -35,7 +33,7 @@ public class MissionParticipation {
     
     @Builder
     public MissionParticipation(Long participateCode, ParticipateStatus participateStatus,
-                               Integer participateCount, User user, Mission mission) {
+                               User user, Mission mission) {
         if (user == null) {
             throw new IllegalArgumentException("User cannot be null");
         }
@@ -45,7 +43,6 @@ public class MissionParticipation {
         
         this.participateCode = participateCode;
         this.participateStatus = participateStatus != null ? participateStatus : ParticipateStatus.PART_BEFORE;
-        this.participateCount = participateCount != null ? participateCount : 0;
         this.user = user;
         this.mission = mission;
     }
@@ -55,9 +52,5 @@ public class MissionParticipation {
             throw new IllegalArgumentException("Status cannot be null");
         }
         this.participateStatus = newStatus;
-    }
-    
-    public void incrementCount() {
-        this.participateCount++;
     }
 }

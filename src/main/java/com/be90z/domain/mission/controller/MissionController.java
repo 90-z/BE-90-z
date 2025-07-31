@@ -2,14 +2,13 @@ package com.be90z.domain.mission.controller;
 
 import com.be90z.domain.mission.dto.request.MissionCreateReqDTO;
 import com.be90z.domain.mission.dto.request.MissionJoinReqDTO;
-import com.be90z.domain.mission.dto.request.MissionReplyReqDTO;
 import com.be90z.domain.mission.dto.request.MissionUpdateReqDTO;
 import com.be90z.domain.mission.dto.response.MissionCreateResDTO;
 import com.be90z.domain.mission.dto.response.MissionDetailResDTO;
 import com.be90z.domain.mission.dto.response.MissionJoinResDTO;
 import com.be90z.domain.mission.dto.response.MissionListResDTO;
-import com.be90z.domain.mission.dto.response.MissionReplyResDTO;
 import com.be90z.domain.mission.service.MissionService;
+import com.be90z.global.exception.NotFoundException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -72,8 +71,16 @@ public class MissionController {
             @PathVariable Long missionCode,
             @Parameter(description = "사용자 ID (선택사항)", example = "1")
             @RequestParam(required = false) Long userId) {
-        MissionDetailResDTO response = missionService.getMissionDetail(missionCode, userId);
-        return ResponseEntity.ok(response);
+        try {
+            MissionDetailResDTO response = missionService.getMissionDetail(missionCode, userId);
+            return ResponseEntity.ok(response);
+        } catch (NotFoundException e) {
+            return ResponseEntity.notFound().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
     }
 
     @PostMapping("/join")
@@ -85,8 +92,19 @@ public class MissionController {
             @ApiResponse(responseCode = "500", description = "서버 에러")
     })
     public ResponseEntity<MissionJoinResDTO> joinMission(@RequestBody MissionJoinReqDTO request) {
-        MissionJoinResDTO response = missionService.joinMission(request);
-        return ResponseEntity.ok(response);
+        try {
+            MissionJoinResDTO response = missionService.joinMission(request);
+            return ResponseEntity.ok(response);
+        } catch (NotFoundException e) {
+            return ResponseEntity.notFound().build();
+        } catch (IllegalArgumentException e) {
+            if (e.getMessage().contains("not found")) {
+                return ResponseEntity.notFound().build();
+            }
+            return ResponseEntity.badRequest().build();
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
     }
 
     @PatchMapping("/status")
@@ -105,8 +123,16 @@ public class MissionController {
             @Parameter(description = "변경할 상태", required = true, example = "PART_COMPLETE")
             @RequestParam String status) {
         
-        String updatedStatus = missionService.updateMissionStatus(userId, missionCode, status);
-        return ResponseEntity.ok(Map.of("status", updatedStatus));
+        try {
+            String updatedStatus = missionService.updateMissionStatus(userId, missionCode, status);
+            return ResponseEntity.ok(Map.of("status", updatedStatus));
+        } catch (NotFoundException e) {
+            return ResponseEntity.notFound().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
     }
 
     @PutMapping("/{missionCode}")
@@ -126,6 +152,8 @@ public class MissionController {
         try {
             MissionDetailResDTO response = missionService.updateMission(missionCode, request);
             return ResponseEntity.ok(response);
+        } catch (NotFoundException e) {
+            return ResponseEntity.badRequest().build();
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
         } catch (Exception e) {
@@ -149,8 +177,10 @@ public class MissionController {
         try {
             missionService.deleteMission(missionCode);
             return ResponseEntity.noContent().build();
-        } catch (IllegalArgumentException e) {
+        } catch (NotFoundException e) {
             return ResponseEntity.notFound().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
         } catch (IllegalStateException e) {
             return ResponseEntity.status(409).build(); // Conflict
         } catch (Exception e) {
@@ -158,27 +188,4 @@ public class MissionController {
         }
     }
 
-    @PostMapping("/{missionCode}/reply")
-    @Operation(summary = "미션 댓글 등록", description = "특정 미션에 댓글을 등록합니다.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "댓글 등록 성공"),
-            @ApiResponse(responseCode = "400", description = "잘못된 요청"),
-            @ApiResponse(responseCode = "404", description = "미션을 찾을 수 없음"),
-            @ApiResponse(responseCode = "500", description = "서버 에러")
-    })
-    public ResponseEntity<MissionReplyResDTO> replyToMission(
-            @Parameter(description = "미션 코드", required = true, example = "1")
-            @PathVariable Long missionCode,
-            @Parameter(description = "미션 댓글 등록 정보", required = true)
-            @Valid @RequestBody MissionReplyReqDTO request) {
-        
-        try {
-            MissionReplyResDTO response = missionService.replyToMission(missionCode, request);
-            return ResponseEntity.ok(response);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.notFound().build();
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError().build();
-        }
-    }
 }
