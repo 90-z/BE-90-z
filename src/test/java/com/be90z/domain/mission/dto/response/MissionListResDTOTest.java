@@ -1,5 +1,6 @@
 package com.be90z.domain.mission.dto.response;
 
+import com.be90z.domain.mission.entity.MissionStatus;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -17,7 +18,7 @@ class MissionListResDTOTest {
         Long missionCode = 1L;
         String missionName = "매일 물 8잔 마시기";
         String missionContent = "하루에 물 8잔을 마시고 인증샷을 올려주세요";
-        String missionStatus = "ACTIVE";
+        MissionStatus missionStatus = MissionStatus.ACTIVE;
         Integer missionMax = 100;
         LocalDateTime startDate = LocalDateTime.of(2025, 7, 1, 0, 0);
         LocalDateTime endDate = LocalDateTime.of(2025, 7, 31, 23, 59);
@@ -29,8 +30,7 @@ class MissionListResDTOTest {
                 .missionName(missionName)
                 .missionContent(missionContent)
                 .missionStatus(missionStatus)
-                .maxParticipants(missionMax)
-                .missionGoalCount(1)
+                .missionMax(missionMax)
                 .startDate(startDate)
                 .endDate(endDate)
                 .currentParticipants(currentParticipants)
@@ -41,7 +41,7 @@ class MissionListResDTOTest {
         assertThat(dto.getMissionName()).isEqualTo(missionName);
         assertThat(dto.getMissionContent()).isEqualTo(missionContent);
         assertThat(dto.getMissionStatus()).isEqualTo(missionStatus);
-        assertThat(dto.getMaxParticipants()).isEqualTo(missionMax);
+        assertThat(dto.getMissionMax()).isEqualTo(missionMax);
         assertThat(dto.getStartDate()).isEqualTo(startDate);
         assertThat(dto.getEndDate()).isEqualTo(endDate);
         assertThat(dto.getCurrentParticipants()).isEqualTo(currentParticipants);
@@ -55,9 +55,8 @@ class MissionListResDTOTest {
                 .missionCode(1L)
                 .missionName("테스트 미션")
                 .missionContent("테스트 내용")
-                .missionStatus("ACTIVE")
-                .missionGoalCount(1)
-                .maxParticipants(50)
+                .missionStatus(MissionStatus.ACTIVE)
+                .missionMax(50)
                 .startDate(LocalDateTime.now())
                 .endDate(LocalDateTime.now().plusDays(7))
                 .build();

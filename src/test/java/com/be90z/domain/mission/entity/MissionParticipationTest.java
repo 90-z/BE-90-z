@@ -1,6 +1,5 @@
 package com.be90z.domain.mission.entity;
 
-import com.be90z.domain.challenge.entity.Challenge;
 import com.be90z.domain.user.entity.User;
 import com.be90z.domain.user.entity.UserAuthority;
 import com.be90z.domain.user.entity.Gender;
@@ -24,25 +23,16 @@ class MissionParticipationTest {
                 .email("test@example.com")
                 .auth(UserAuthority.USER)
                 .createdAt(LocalDateTime.now())
-                .gender(Gender.WOMAN)
+                .gender(Gender.MAN)
                 .birth(1990)
-                .build();
-
-        Challenge challenge = Challenge.builder()
-                .challengeId(1L)
-                .challengeName("테스트 챌린지")
-                .challengeDescription("테스트 챌린지 설명")
-                .startDate(LocalDateTime.now())
-                .endDate(LocalDateTime.now().plusDays(30))
-                .createdAt(LocalDateTime.now())
                 .build();
 
         Mission mission = Mission.builder()
                 .missionCode(1L)
-                .challenge(challenge)
                 .missionName("테스트 미션")
                 .missionContent("테스트 미션 내용")
                 .missionStatus(MissionStatus.ACTIVE)
+                .missionMax(100)
                 .startDate(LocalDateTime.now())
                 .endDate(LocalDateTime.now().plusDays(30))
                 .createdAt(LocalDateTime.now())
@@ -76,7 +66,7 @@ class MissionParticipationTest {
                 .nickname("테스트유저")
                 .email("test@example.com")
                 .auth(UserAuthority.USER)
-                .gender(Gender.WOMAN)
+                .gender(Gender.MAN)
                 .birth(1990)
                 .createdAt(LocalDateTime.now())
                 .build();

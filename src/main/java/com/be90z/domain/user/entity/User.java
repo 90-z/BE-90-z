@@ -36,9 +36,16 @@ public class User {
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
     
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Gender gender;
+    
+    @Column(nullable = false)
+    private Integer birth;
+    
     @Builder
     public User(Long userId, String provider, String nickname, String email, 
-                UserAuthority auth, LocalDateTime createdAt) {
+                UserAuthority auth, LocalDateTime createdAt, Gender gender, Integer birth) {
         if (provider == null) {
             throw new IllegalArgumentException("Provider cannot be null");
         }
@@ -48,6 +55,12 @@ public class User {
         if (email == null) {
             throw new IllegalArgumentException("Email cannot be null");
         }
+        if (gender == null) {
+            throw new IllegalArgumentException("Gender cannot be null");
+        }
+        if (birth == null) {
+            throw new IllegalArgumentException("Birth cannot be null");
+        }
         
         this.userId = userId;
         this.provider = provider;
@@ -55,5 +68,7 @@ public class User {
         this.email = email;
         this.auth = auth != null ? auth : UserAuthority.USER;
         this.createdAt = createdAt != null ? createdAt : LocalDateTime.now();
+        this.gender = gender;
+        this.birth = birth;
     }
 }

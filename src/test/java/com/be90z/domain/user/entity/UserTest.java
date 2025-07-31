@@ -17,6 +17,8 @@ class UserTest {
         String nickname = "테스트유저";
         String email = "test@example.com";
         UserAuthority auth = UserAuthority.USER;
+        Gender gender = Gender.MAN;
+        Integer birth = 1990;
         LocalDateTime createdAt = LocalDateTime.now();
 
         // when
@@ -25,6 +27,8 @@ class UserTest {
                 .nickname(nickname)
                 .email(email)
                 .auth(auth)
+                .gender(gender)
+                .birth(birth)
                 .createdAt(createdAt)
                 .build();
 
@@ -33,6 +37,8 @@ class UserTest {
         assertThat(user.getNickname()).isEqualTo(nickname);
         assertThat(user.getEmail()).isEqualTo(email);
         assertThat(user.getAuth()).isEqualTo(auth);
+        assertThat(user.getGender()).isEqualTo(gender);
+        assertThat(user.getBirth()).isEqualTo(birth);
         assertThat(user.getCreatedAt()).isEqualTo(createdAt);
     }
 
@@ -43,17 +49,23 @@ class UserTest {
         String provider = "kakao";
         String nickname = "테스트유저";
         String email = "test@example.com";
+        Gender gender = Gender.WOMAN;
+        Integer birth = 1995;
 
         // when
         User user = User.builder()
                 .provider(provider)
                 .nickname(nickname)
                 .email(email)
+                .gender(gender)
+                .birth(birth)
                 .build();
 
         // then
         assertThat(user.getAuth()).isEqualTo(UserAuthority.USER);
         assertThat(user.getCreatedAt()).isNotNull();
+        assertThat(user.getGender()).isEqualTo(gender);
+        assertThat(user.getBirth()).isEqualTo(birth);
     }
 
     @Test

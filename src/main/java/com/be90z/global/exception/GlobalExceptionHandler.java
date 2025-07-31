@@ -16,6 +16,16 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    @ExceptionHandler(NotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleNotFound(NotFoundException e) {
+        log.warn("NotFoundException caught by handler: {}", e.getMessage());
+        ErrorResponse errorResponse = ErrorResponse.builder()
+                .message(e.getMessage())
+                .code("NOT_FOUND")
+                .build();
+        return ResponseEntity.status(404).body(errorResponse);
+    }
+
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ErrorResponse> handleIllegalArgument(IllegalArgumentException e) {
         log.warn("IllegalArgumentException: {}", e.getMessage());

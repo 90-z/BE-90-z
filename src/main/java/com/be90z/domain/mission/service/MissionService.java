@@ -2,13 +2,11 @@ package com.be90z.domain.mission.service;
 
 import com.be90z.domain.mission.dto.request.MissionCreateReqDTO;
 import com.be90z.domain.mission.dto.request.MissionJoinReqDTO;
-import com.be90z.domain.mission.dto.request.MissionReplyReqDTO;
 import com.be90z.domain.mission.dto.request.MissionUpdateReqDTO;
 import com.be90z.domain.mission.dto.response.MissionCreateResDTO;
 import com.be90z.domain.mission.dto.response.MissionDetailResDTO;
 import com.be90z.domain.mission.dto.response.MissionJoinResDTO;
 import com.be90z.domain.mission.dto.response.MissionListResDTO;
-import com.be90z.domain.mission.dto.response.MissionReplyResDTO;
 import com.be90z.domain.mission.entity.Mission;
 import com.be90z.domain.mission.entity.MissionParticipation;
 import com.be90z.domain.mission.entity.ParticipateStatus;
@@ -16,6 +14,7 @@ import com.be90z.domain.mission.repository.MissionParticipationRepository;
 import com.be90z.domain.mission.repository.MissionRepository;
 import com.be90z.domain.user.entity.User;
 import com.be90z.domain.user.repository.UserRepository;
+import com.be90z.global.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -41,22 +40,24 @@ public class MissionService {
         }
         
         Mission mission = Mission.builder()
+                .missionName(request.getMissionName())
                 .missionContent(request.getMissionContent())
-                .missionGoalCount(request.getMissionGoalCount())
+                .missionStatus(request.getMissionStatus())
+                .missionMax(request.getMissionMax())
                 .startDate(request.getStartDate())
                 .endDate(request.getEndDate())
-                .maxParticipants(request.getMaxParticipants())
                 .build();
         
         Mission savedMission = missionRepository.save(mission);
         
         return MissionCreateResDTO.builder()
                 .missionCode(savedMission.getMissionCode())
+                .missionName(savedMission.getMissionName())
                 .missionContent(savedMission.getMissionContent())
-                .missionGoalCount(savedMission.getMissionGoalCount())
+                .missionStatus(savedMission.getMissionStatus())
+                .missionMax(savedMission.getMissionMax())
                 .startDate(savedMission.getStartDate())
                 .endDate(savedMission.getEndDate())
-                .maxParticipants(savedMission.getMaxParticipants())
                 .createdAt(savedMission.getCreatedAt())
                 .build();
     }
@@ -69,8 +70,10 @@ public class MissionService {
                     Long participantCount = missionParticipationRepository.countCompletedParticipationsByMission(mission);
                     return MissionListResDTO.builder()
                             .missionCode(mission.getMissionCode())
+                            .missionName(mission.getMissionName())
                             .missionContent(mission.getMissionContent())
-                            .missionGoalCount(mission.getMissionGoalCount())
+                            .missionStatus(mission.getMissionStatus())
+                            .missionMax(mission.getMissionMax())
                             .startDate(mission.getStartDate())
                             .endDate(mission.getEndDate())
                             .currentParticipants(participantCount.intValue())
@@ -82,10 +85,10 @@ public class MissionService {
     @Transactional
     public MissionJoinResDTO joinMission(MissionJoinReqDTO request) {
         User user = userRepository.findById(request.getUserId())
-                .orElseThrow(() -> new IllegalArgumentException("User not found with id: " + request.getUserId()));
+                .orElseThrow(() -> new NotFoundException("User not found with id: " + request.getUserId()));
         
         Mission mission = missionRepository.findById(request.getMissionCode())
-                .orElseThrow(() -> new IllegalArgumentException("Mission not found with code: " + request.getMissionCode()));
+                .orElseThrow(() -> new NotFoundException("Mission not found with code: " + request.getMissionCode()));
         
         Optional<MissionParticipation> existingParticipation = 
                 missionParticipationRepository.findByUserAndMission(user, mission);
@@ -94,13 +97,8 @@ public class MissionService {
             throw new IllegalArgumentException("User already participated in this mission");
         }
         
-        // Generate unique participate code based on current time
-        Long participateCode = System.currentTimeMillis();
-        
         MissionParticipation participation = MissionParticipation.builder()
-                .participateCode(participateCode)
                 .participateStatus(ParticipateStatus.PART_BEFORE)
-                .participateCount(0)
                 .user(user)
                 .mission(mission)
                 .build();
@@ -116,7 +114,7 @@ public class MissionService {
 
     public MissionDetailResDTO getMissionDetail(Long missionCode, Long userId) {
         Mission mission = missionRepository.findById(missionCode)
-                .orElseThrow(() -> new IllegalArgumentException("Mission not found with code: " + missionCode));
+                .orElseThrow(() -> new NotFoundException("Mission not found with code: " + missionCode));
         
         Long participantCount = missionParticipationRepository.countCompletedParticipationsByMission(mission);
         
@@ -138,13 +136,13 @@ public class MissionService {
         
         return MissionDetailResDTO.builder()
                 .missionCode(mission.getMissionCode())
+                .missionName(mission.getMissionName())
                 .missionContent(mission.getMissionContent())
-                .missionGoalCount(mission.getMissionGoalCount())
+                .missionStatus(mission.getMissionStatus())
+                .missionMax(mission.getMissionMax())
                 .startDate(mission.getStartDate())
                 .endDate(mission.getEndDate())
                 .currentParticipants(participantCount.intValue())
-                .maxParticipants(mission.getMaxParticipants())
-                .status("ACTIVE")
                 .isParticipating(isParticipating)
                 .participationStatus(participationStatus)
                 .build();
@@ -153,13 +151,13 @@ public class MissionService {
     @Transactional
     public String updateMissionStatus(Long userId, Long missionCode, String newStatus) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("User not found with id: " + userId));
+                .orElseThrow(() -> new NotFoundException("User not found with id: " + userId));
         
         Mission mission = missionRepository.findById(missionCode)
-                .orElseThrow(() -> new IllegalArgumentException("Mission not found with code: " + missionCode));
+                .orElseThrow(() -> new NotFoundException("Mission not found with code: " + missionCode));
         
         MissionParticipation participation = missionParticipationRepository.findByUserAndMission(user, mission)
-                .orElseThrow(() -> new IllegalArgumentException("User not participated in this mission"));
+                .orElseThrow(() -> new NotFoundException("User not participated in this mission"));
         
         ParticipateStatus status = ParticipateStatus.valueOf(newStatus);
         participation.updateStatus(status);
@@ -170,7 +168,7 @@ public class MissionService {
     @Transactional
     public MissionDetailResDTO updateMission(Long missionCode, MissionUpdateReqDTO request) {
         Mission mission = missionRepository.findById(missionCode)
-                .orElseThrow(() -> new IllegalArgumentException("Mission not found with code: " + missionCode));
+                .orElseThrow(() -> new NotFoundException("Mission not found with code: " + missionCode));
         
         // 날짜 유효성 검증
         if (request.getEndDate() != null && request.getStartDate() != null && 
@@ -179,12 +177,11 @@ public class MissionService {
         }
         
         mission.updateMission(
-            null, // missionName은 updateMission에서 따로 업데이트 안함
+            request.getMissionName(),
             request.getMissionContent(),
-            request.getMissionGoalCount(),
             request.getStartDate(),
             request.getEndDate(),
-            request.getMaxParticipants()
+            request.getMissionMax()
         );
         
         Mission updatedMission = missionRepository.save(mission);
@@ -194,13 +191,13 @@ public class MissionService {
         
         return MissionDetailResDTO.builder()
                 .missionCode(updatedMission.getMissionCode())
+                .missionName(updatedMission.getMissionName())
                 .missionContent(updatedMission.getMissionContent())
-                .missionGoalCount(updatedMission.getMissionGoalCount())
+                .missionStatus(updatedMission.getMissionStatus())
+                .missionMax(updatedMission.getMissionMax())
                 .startDate(updatedMission.getStartDate())
                 .endDate(updatedMission.getEndDate())
                 .currentParticipants(participantCount.intValue())
-                .maxParticipants(updatedMission.getMaxParticipants())
-                .status("ACTIVE")
                 .isParticipating(false)
                 .participationStatus(null)
                 .build();
@@ -209,7 +206,7 @@ public class MissionService {
     @Transactional
     public void deleteMission(Long missionCode) {
         Mission mission = missionRepository.findById(missionCode)
-                .orElseThrow(() -> new IllegalArgumentException("Mission not found with code: " + missionCode));
+                .orElseThrow(() -> new NotFoundException("Mission not found with code: " + missionCode));
         
         // 미션에 참여한 사용자가 있는지 확인
         Long participantCount = missionParticipationRepository.countCompletedParticipationsByMission(mission);
@@ -222,35 +219,6 @@ public class MissionService {
         missionRepository.delete(mission);
     }
 
-    @Transactional
-    public MissionReplyResDTO replyToMission(Long missionCode, MissionReplyReqDTO request) {
-        // 입력 유효성 검증
-        if (missionCode == null) {
-            throw new IllegalArgumentException("Mission code cannot be null");
-        }
-        if (request == null) {
-            throw new IllegalArgumentException("Request cannot be null");
-        }
-        
-        // 미션 조회
-        Mission mission = missionRepository.findById(missionCode)
-                .orElseThrow(() -> new IllegalArgumentException("Mission not found with code: " + missionCode));
-        
-        // 고유한 댓글 코드 생성
-        Long replyCode = System.currentTimeMillis() + (long)(Math.random() * 1000);
-        
-        // 현재 시간으로 생성 시간 설정
-        LocalDateTime createdAt = LocalDateTime.now();
-        
-        // 응답 DTO 생성
-        return MissionReplyResDTO.builder()
-                .replyCode(replyCode)
-                .missionCode(missionCode)
-                .missionName(request.getMissionName())
-                .missionContent(request.getMissionContent())
-                .createdAt(createdAt)
-                .build();
-    }
 
     /**
      * 전체 활성 미션 조회 (명세: GET api/v1/mission)
@@ -261,17 +229,19 @@ public class MissionService {
         );
         
         return activeMissions.stream()
-                .map(mission -> MissionListResDTO.builder()
-                        .missionCode(mission.getMissionCode())
-                        .missionName(mission.getMissionName())
-                        .missionContent(mission.getMissionContent())
-                        .missionStatus(mission.getMissionStatus().name())
-                        .missionGoalCount(mission.getMissionGoalCount())
-                        .maxParticipants(mission.getMaxParticipants())
-                        .startDate(mission.getStartDate())
-                        .endDate(mission.getEndDate())
-                        .currentParticipants(0) // TODO: 실제 참여자 수 계산 로직 추가
-                        .build())
+                .map(mission -> {
+                    Long participantCount = missionParticipationRepository.countCompletedParticipationsByMission(mission);
+                    return MissionListResDTO.builder()
+                            .missionCode(mission.getMissionCode())
+                            .missionName(mission.getMissionName())
+                            .missionContent(mission.getMissionContent())
+                            .missionStatus(mission.getMissionStatus())
+                            .missionMax(mission.getMissionMax())
+                            .startDate(mission.getStartDate())
+                            .endDate(mission.getEndDate())
+                            .currentParticipants(participantCount.intValue())
+                            .build();
+                })
                 .toList();
     }
 }

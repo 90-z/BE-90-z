@@ -3,6 +3,7 @@ package com.be90z.domain.mission.controller;
 import com.be90z.domain.mission.dto.request.MissionJoinReqDTO;
 import com.be90z.domain.mission.dto.response.MissionJoinResDTO;
 import com.be90z.domain.mission.dto.response.MissionListResDTO;
+import com.be90z.domain.mission.entity.MissionStatus;
 import com.be90z.domain.mission.service.MissionService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
@@ -46,8 +47,8 @@ class MissionControllerTest {
                 .missionCode(1L)
                 .missionName("매일 물 8잔 마시기")
                 .missionContent("하루에 물 8잔을 마시고 인증샷을 올려주세요")
-                .missionStatus("ACTIVE")
-                .maxParticipants(100)
+                .missionStatus(MissionStatus.ACTIVE)
+                .missionMax(100)
                 .startDate(LocalDateTime.of(2025, 7, 1, 0, 0))
                 .endDate(LocalDateTime.of(2025, 7, 31, 23, 59))
                 .currentParticipants(45)
@@ -57,8 +58,8 @@ class MissionControllerTest {
                 .missionCode(2L)
                 .missionName("운동하기")
                 .missionContent("매일 30분 운동하기")
-                .missionStatus("ACTIVE")
-                .maxParticipants(50)
+                .missionStatus(MissionStatus.ACTIVE)
+                .missionMax(50)
                 .startDate(LocalDateTime.of(2025, 7, 1, 0, 0))
                 .endDate(LocalDateTime.of(2025, 7, 31, 23, 59))
                 .currentParticipants(20)
@@ -130,7 +131,7 @@ class MissionControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request))
                         .with(csrf()))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isNotFound());
     }
 
     @Test

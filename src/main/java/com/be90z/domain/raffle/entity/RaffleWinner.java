@@ -11,29 +11,33 @@ import lombok.AccessLevel;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class RaffleWinner {
-    
+
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "winner_code")
     private Long winnerCode;
-    
+
     @Column(name = "winner_prize", nullable = false)
     private String winnerPrize;
-    
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumns({
         @JoinColumn(name = "raffle_code", referencedColumnName = "raffle_code"),
         @JoinColumn(name = "participate_code", referencedColumnName = "participate_code")
     })
-    private RaffleEntry raffleEntry;
-    
+    private Raffle raffle;
+
     @Builder
-    public RaffleWinner(Long winnerCode, String winnerPrize, RaffleEntry raffleEntry) {
+    public RaffleWinner(Long winnerCode, String winnerPrize, Raffle raffle) {
+        if (raffle == null) {
+            throw new IllegalArgumentException("Raffle cannot be null");
+        }
         if (winnerPrize == null) {
             throw new IllegalArgumentException("Winner prize cannot be null");
         }
-        
+
         this.winnerCode = winnerCode;
         this.winnerPrize = winnerPrize;
-        this.raffleEntry = raffleEntry;
+        this.raffle = raffle;
     }
 }

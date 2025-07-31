@@ -1,8 +1,5 @@
 package com.be90z.domain.mission.repository;
 
-import com.be90z.domain.challenge.entity.Challenge;
-import com.be90z.domain.challenge.entity.ChallengeStatus;
-import com.be90z.domain.challenge.repository.ChallengeRepository;
 import com.be90z.domain.mission.entity.Mission;
 import com.be90z.domain.mission.entity.MissionStatus;
 import org.junit.jupiter.api.DisplayName;
@@ -24,38 +21,28 @@ class MissionRepositoryTest {
     @Autowired
     private MissionRepository missionRepository;
 
-    @Autowired
-    private ChallengeRepository challengeRepository;
-
     @Test
     @DisplayName("MissionStatus로 미션 조회")
     void findByMissionStatus() {
         // given
-        Challenge challenge = Challenge.builder()
-                .challengeName("테스트 챌린지")
-                .challengeDescription("테스트 설명")
-                .challengeStatus(ChallengeStatus.ACTIVE)
-                .startDate(LocalDateTime.now())
-                .endDate(LocalDateTime.now().plusDays(30))
-                .build();
-        challenge = challengeRepository.save(challenge);
-
         Mission activeMission = Mission.builder()
                 .missionName("활성 미션")
                 .missionContent("활성 미션 내용")
                 .missionStatus(MissionStatus.ACTIVE)
-                .challenge(challenge)
+                .missionMax(100)
                 .startDate(LocalDateTime.now())
                 .endDate(LocalDateTime.now().plusDays(7))
+                .createdAt(LocalDateTime.now())
                 .build();
 
         Mission completedMission = Mission.builder()
                 .missionName("완료된 미션")
                 .missionContent("완료된 미션 내용")
                 .missionStatus(MissionStatus.COMPLETED)
-                .challenge(challenge)
+                .missionMax(50)
                 .startDate(LocalDateTime.now().minusDays(7))
                 .endDate(LocalDateTime.now())
+                .createdAt(LocalDateTime.now())
                 .build();
 
         missionRepository.save(activeMission);
@@ -77,31 +64,24 @@ class MissionRepositoryTest {
     @DisplayName("MissionStatus로 미션 조회 - 생성일 내림차순")
     void findByMissionStatusOrderByCreatedAtDesc() {
         // given
-        Challenge challenge = Challenge.builder()
-                .challengeName("테스트 챌린지")
-                .challengeDescription("테스트 설명")
-                .challengeStatus(ChallengeStatus.ACTIVE)
-                .startDate(LocalDateTime.now())
-                .endDate(LocalDateTime.now().plusDays(30))
-                .build();
-        challenge = challengeRepository.save(challenge);
-
         Mission mission1 = Mission.builder()
                 .missionName("첫 번째 미션")
                 .missionContent("첫 번째 미션 내용")
                 .missionStatus(MissionStatus.ACTIVE)
-                .challenge(challenge)
+                .missionMax(100)
                 .startDate(LocalDateTime.now())
                 .endDate(LocalDateTime.now().plusDays(7))
+                .createdAt(LocalDateTime.now())
                 .build();
 
         Mission mission2 = Mission.builder()
                 .missionName("두 번째 미션")
                 .missionContent("두 번째 미션 내용")
                 .missionStatus(MissionStatus.ACTIVE)
-                .challenge(challenge)
+                .missionMax(200)
                 .startDate(LocalDateTime.now())
                 .endDate(LocalDateTime.now().plusDays(7))
+                .createdAt(LocalDateTime.now().plusNanos(1000000))  // 약간 다른 시간으로 생성일 구분
                 .build();
 
         missionRepository.save(mission1);

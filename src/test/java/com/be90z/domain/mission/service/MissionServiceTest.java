@@ -1,12 +1,11 @@
 package com.be90z.domain.mission.service;
 
-import com.be90z.domain.challenge.entity.Challenge;
-import com.be90z.domain.challenge.entity.ChallengeStatus;
-import com.be90z.domain.challenge.repository.ChallengeRepository;
 import com.be90z.domain.mission.dto.response.MissionListResDTO;
 import com.be90z.domain.mission.entity.Mission;
 import com.be90z.domain.mission.entity.MissionStatus;
 import com.be90z.domain.mission.repository.MissionRepository;
+import com.be90z.domain.mission.repository.MissionParticipationRepository;
+import com.be90z.domain.user.repository.UserRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -29,7 +28,10 @@ class MissionServiceTest {
     private MissionRepository missionRepository;
 
     @Mock
-    private ChallengeRepository challengeRepository;
+    private MissionParticipationRepository missionParticipationRepository;
+
+    @Mock
+    private UserRepository userRepository;
 
     @InjectMocks
     private MissionService missionService;
@@ -38,22 +40,12 @@ class MissionServiceTest {
     @DisplayName("전체 미션 조회 - 활성 상태 미션들을 최신순으로 반환")
     void getAllActiveMissions() {
         // given
-        Challenge challenge = Challenge.builder()
-                .challengeId(1L)
-                .challengeName("다이어트 챌린지")
-                .challengeDescription("건강한 다이어트")
-                .challengeStatus(ChallengeStatus.ACTIVE)
-                .startDate(LocalDateTime.now())
-                .endDate(LocalDateTime.now().plusDays(30))
-                .build();
-
         Mission mission1 = Mission.builder()
                 .missionCode(1L)
                 .missionName("매일 물 8잔 마시기")
                 .missionContent("하루에 물을 8잔 이상 마시기")
                 .missionStatus(MissionStatus.ACTIVE)
-                .challenge(challenge)
-                .maxParticipants(100)
+                .missionMax(100)
                 .startDate(LocalDateTime.now())
                 .endDate(LocalDateTime.now().plusDays(7))
                 .createdAt(LocalDateTime.now().minusHours(2))
@@ -64,8 +56,7 @@ class MissionServiceTest {
                 .missionName("운동하기")
                 .missionContent("하루 30분 이상 운동하기")
                 .missionStatus(MissionStatus.ACTIVE)
-                .challenge(challenge)
-                .maxParticipants(50)
+                .missionMax(50)
                 .startDate(LocalDateTime.now())
                 .endDate(LocalDateTime.now().plusDays(7))
                 .createdAt(LocalDateTime.now().minusHours(1))
@@ -82,11 +73,11 @@ class MissionServiceTest {
         
         MissionListResDTO dto1 = result.get(0);
         assertThat(dto1.getMissionName()).isEqualTo("운동하기");
-        assertThat(dto1.getMissionStatus()).isEqualTo("ACTIVE");
-        assertThat(dto1.getMaxParticipants()).isEqualTo(50);
+        assertThat(dto1.getMissionStatus()).isEqualTo(MissionStatus.ACTIVE);
+        assertThat(dto1.getMissionMax()).isEqualTo(50);
         
         MissionListResDTO dto2 = result.get(1);
         assertThat(dto2.getMissionName()).isEqualTo("매일 물 8잔 마시기");
-        assertThat(dto2.getMaxParticipants()).isEqualTo(100);
+        assertThat(dto2.getMissionMax()).isEqualTo(100);
     }
 }
