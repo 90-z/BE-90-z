@@ -1,0 +1,38 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:testdb;MODE=MariaDB;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;NON_KEYWORDS=USER
+    username: sa
+    password: 
+    driver-class-name: org.h2.Driver
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+    defer-datasource-initialization: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.H2Dialect
+  sql:
+    init:
+      schema-locations: classpath:schema.sql
+      mode: always
+
+# 테스트용 환경 변수 설정
+jwt:
+  secret: test-jwt-secret-for-testing-environment-this-must-be-long-enough-for-security
+
+gemini:
+  api:
+    url: http://localhost:8080/test
+    key: test-gemini-key
+
+# 카카오 API 키 (테스트용)
+KAKAO_REST_API_KEY: test-kakao-api-key
+KAKAO_CLIENT_SECRET: test-kakao-client-secret
+KAKAO_LOGIN_REDIRECT_URI: http://localhost:8080/auth/callback/kakao
+
+logging:
+  level:
+    org.springframework.web: DEBUG
+    com.be90z: DEBUG

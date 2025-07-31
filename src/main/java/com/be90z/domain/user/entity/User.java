@@ -1,6 +1,7 @@
 package com.be90z.domain.user.entity;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -30,6 +31,7 @@ public class User {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private UserAuthority auth = UserAuthority.USER;
+    
     
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
