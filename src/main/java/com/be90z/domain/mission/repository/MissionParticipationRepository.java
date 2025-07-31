@@ -31,4 +31,6 @@ public interface MissionParticipationRepository extends JpaRepository<MissionPar
     
     @Query("SELECT COUNT(mp) FROM MissionParticipation mp WHERE mp.user.userId = :userId AND mp.participateStatus = :status")
     Integer countByUserIdAndParticipateStatus(@Param("userId") Long userId, @Param("status") ParticipateStatus status);
+    
+    void deleteByMission(Mission mission);
 }

@@ -1,6 +1,7 @@
 package com.be90z.domain.mission.repository;
 
 import com.be90z.domain.mission.entity.Mission;
+import com.be90z.domain.mission.entity.MissionStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -16,4 +17,8 @@ public interface MissionRepository extends JpaRepository<Mission, Long> {
     List<Mission> findActiveMissions(@Param("now") LocalDateTime now);
     
     List<Mission> findAllByOrderByCreatedAtDesc();
+    
+    List<Mission> findByMissionStatus(MissionStatus missionStatus);
+    
+    List<Mission> findByMissionStatusOrderByCreatedAtDesc(MissionStatus missionStatus);
 }
