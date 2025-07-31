@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
+import reactor.core.publisher.Mono;
 
 /* Gemini API와 통신하는 외부 서비스
  * 외부 API 호출 로직을 담당 */
@@ -128,5 +129,34 @@ public class GeminiService {
             log.error("Gemini API 호출 중 예상치 못한 오류: {}", e.getMessage(), e);
             throw new RuntimeException("Gemini API 통신 실패", e);
         }
+    }
+//    Reactive 방식
+    public Mono<String> analyzeRecipeAsync(String recipeName, String recipeContent) {
+        log.info("Gemini 비동기 레시피 분석 요청 - 제목:{}, 내용길이:{}",
+                recipeName != null ? recipeName : "(제목없음)", recipeContent.length());
+
+        if(!geminiRecipePrompt.isValidInput(recipeName, recipeContent)) {
+            return Mono.error(new IllegalArgumentException("레시피 내용이 너무 짧거나 깁니다."));
+        }
+
+        String prompt = geminiRecipePrompt.createGeminiRecipePrompt(recipeName, recipeContent);
+        GeminiReqDTO geminiReqDTO = GeminiReqDTO.getGeminiReqDTO(prompt);
+
+        return geminiWebClient
+                .post()
+                .uri("?key=" + geminiApiKey)
+                .bodyValue(geminiReqDTO)
+                .retrieve()
+                .bodyToMono(GeminiResDTO.class)
+                .map(response -> {
+                    if(response != null && response.isValidResponse()) {
+                        String result = response.getFirstCandidateText();
+                        log.info("Gemini 비동기 레시피 분석 성공");
+                        return result;
+                    } else {
+                        throw new RuntimeException("Gemini API 응답이 유효하지 않습니다.");
+                    }
+                })
+                .doOnError(error -> log.error("Gemini 비동기 API 호출 실패 {}", error.getMessage()));
     }
 }
