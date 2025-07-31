@@ -11,15 +11,18 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import reactor.core.publisher.Mono;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 @Tag(name = "recipe", description = "레시피 API")
 @RestController
 @RequiredArgsConstructor
@@ -29,12 +32,22 @@ public class RecipeController {
     private final RecipeService recipeService;
     private final ObjectMapper objectMapper;
 
+//    @PostMapping("/ai")
+//    @Operation(summary = " AI 레시피 분석", description = "제목과 내용을 AI로 분석하여 레시피 상세 내용을 생성합니다")
+//    public ResponseEntity<RecipeAiResDTO> createRecipeWithAi(
+//            @RequestBody RecipeCreateFreeDTO recipeCreateFreeDTO) throws IOException {
+//        RecipeAiResDTO recipeAiResDTO = recipeService.createRecipeWithAi(recipeCreateFreeDTO);
+//        return ResponseEntity.ok(recipeAiResDTO);
+//    }
+
     @PostMapping("/ai")
-    @Operation(summary = " AI 레시피 분석", description = "제목과 내용을 AI로 분석하여 레시피 상세 내용을 생성합니다")
-    public ResponseEntity<RecipeAiResDTO> createRecipeWithAi(
+    @Operation(summary = "AI 레시피 분석 - 비동기", description = "제목과 내용을 AI로 분석하여 레시피 상세 내용을 생성합니다.")
+    public Mono<ResponseEntity<RecipeAiResDTO>> createRecipeWithAiAsync(
             @RequestBody RecipeCreateFreeDTO recipeCreateFreeDTO) throws IOException {
-        RecipeAiResDTO recipeAiResDTO = recipeService.createRecipeWithAi(recipeCreateFreeDTO);
-        return ResponseEntity.ok(recipeAiResDTO);
+        return recipeService.createRecipeWithAiAsync(recipeCreateFreeDTO)
+                .map(ResponseEntity::ok)
+                .doOnSuccess(response -> log.info("비동기 AI 레시피 분석 완료"))
+                .doOnError(error -> log.error("비동기 AI 레시피 분석 실패: ", error.getMessage()));
     }
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
