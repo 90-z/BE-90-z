@@ -28,7 +28,7 @@ public class GeminiRecipePrompt {
                            - "DOUBLE": 2인분 \s
                            - "FAMILY": 4인분 이상
                         5. recipeTime: 조리 과정을 분석한 예상 소요시간 (1~180분 사이 정수)
-                        6. recipeCookMethod: 주요 조리 방법 (예: "볶기", "끓이기", "굽기", "튀기기", "찜", "무침", "계란말이" 등)
+                        6. recipeCookMethod: 주요 조리 방법 ("전자레인지", "에어프라이어", "프라이팬", "냄비", "오븐", "불 없이 요리") 중에서 선택해줘
                         7. ingredientsList: 내용에서 구체적으로 언급된 재료들만 추출
             
                         === 재료 추출 주의사항 ===
@@ -62,7 +62,7 @@ public class GeminiRecipePrompt {
                           "recipeCalories": 240,
                           "recipePeople": "DOUBLE",
                           "recipeTime": 25,
-                          "recipeCookMethod": "볶기",
+                          "recipeCookMethod": "프라이팬",
                           "ingredientsList": [
                             {
                               "ingredientName": "계란",
