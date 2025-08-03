@@ -37,16 +37,6 @@ public class RecipeService {
     private final GeminiResParser geminiResParser;
     private final RecipeTagService recipeTagService;
 
-    //   AI로 레시피 분석
-//    @Transactional
-//    public RecipeAiResDTO createRecipeWithAi(RecipeCreateFreeDTO recipeCreateFreeDTO) throws IOException {
-//        String geminiResJson = geminiService.analyzeRecipe(
-//                recipeCreateFreeDTO.getRecipeName(),
-//                recipeCreateFreeDTO.getRecipeContent()
-//        );
-//        return geminiResParser.parseResponse(geminiResJson, RecipeAiResDTO.class);
-//    }
-
     //    레시피 분석 비동기로
     @Transactional
     public Mono<RecipeAiResDTO> createRecipeWithAiAsync(RecipeCreateFreeDTO recipeCreateFreeDTO) throws IOException {
@@ -288,5 +278,44 @@ public class RecipeService {
         recipeResDTO.setRecipeTagList(recipeTagList);
 
         return recipeResDTO;
+    }
+
+//    레시피 검색
+//    키워드(제목, 내용)나 재료로 검색
+    @Transactional(readOnly = true)
+    public List<RecipeResDTO> searchRecipe(String keyword, String ingredient) {
+        if((keyword == null || keyword.isEmpty()) && (ingredient == null || ingredient.isEmpty())) {
+            return getAllRecipe();
+        }
+        List<Recipe> recipes = recipeRepository.searchRecipeByKeywordAndIngredient(keyword != null ? keyword.trim() : null,
+                                                                                    ingredient != null ? ingredient.trim() : null);
+        return recipes.stream()
+                .map(this::convertToResponseDTO)
+                .collect(Collectors.toList());
+
+    }
+
+//    키워드로 검색
+    @Transactional(readOnly = true)
+    public List<RecipeResDTO> searchRecipeByKeyword(String keyword) {
+        if(keyword == null || keyword.isEmpty()) {
+            return getAllRecipe();
+        }
+        List<Recipe> recipes = recipeRepository.searchByRecipeKeyword(keyword);
+        return recipes.stream()
+                .map(this::convertToResponseDTO)
+                .collect(Collectors.toList());
+    }
+
+//    재료로 검색
+    @Transactional(readOnly = true)
+    public List<RecipeResDTO> searchRecipeByIngredient(String ingredient) {
+        if(ingredient == null || ingredient.trim().isEmpty()) {
+            return getAllRecipe();
+        }
+        List<Recipe> recipes = recipeRepository.searchByIngredient(ingredient.trim());
+        return recipes.stream()
+                .map(this::convertToResponseDTO)
+                .collect(Collectors.toList());
     }
 }
