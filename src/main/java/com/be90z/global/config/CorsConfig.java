@@ -9,7 +9,13 @@ public class CorsConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")  // 모든 경로에 대해
-                .allowedOrigins("*")  // 모든 출처 허용 (개발용)
+                .allowedOrigins("https://mde.me.kr",
+                        "https://www.mde.me.kr",
+                        "https://api.mde.me.kr",
+                        "http://localhost:8080", // 로컬 개발용
+                        "http://3.37.33.223:8080", // 배포 서버 ip
+                        "https://3.37.33.223:8080" // https 배포 서버
+                )  // 도메인
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")  // 허용할 HTTP 메서드
                 .allowedHeaders("*")  // 모든 헤더 허용
                 .allowCredentials(false);  // 인증 정보 포함 안 함

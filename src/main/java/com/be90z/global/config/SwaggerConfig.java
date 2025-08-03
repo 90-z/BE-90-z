@@ -24,6 +24,9 @@ public class SwaggerConfig {
                                 .email("contact@be90z.com")))
                 .servers(List.of(
                         new Server()
+                                .url("http://3.37.33.223:8080")  // EC2 서버 추가
+                                .description("배포 서버"),
+                        new Server()
                                 .url("http://localhost:8080")
                                 .description("개발 서버")
                 ));
