@@ -9,6 +9,7 @@ import java.util.List;
 @Data
 public class RecipeAiResDTO {
     private String recipeName;
+    private List<String> suggestedIngredients; // AI가 추출한 15개 재료 리스트
     @Lob
     private String recipeContent;
     private Integer recipeCalories;

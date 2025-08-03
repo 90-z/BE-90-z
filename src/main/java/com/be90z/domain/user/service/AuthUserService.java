@@ -2,9 +2,8 @@ package com.be90z.domain.user.service;
 
 import com.be90z.domain.user.dto.response.KakaoUserResDTO;
 import com.be90z.domain.user.dto.response.LoginResDTO;
-import com.be90z.domain.user.entity.Auth;
-import com.be90z.domain.user.entity.Gender;
 import com.be90z.domain.user.entity.User;
+import com.be90z.domain.user.entity.UserAuthority;
 import com.be90z.domain.user.repository.UserRepository;
 import com.be90z.global.config.RestTemplateConfig;
 import com.be90z.global.util.JwtUtil;
@@ -15,6 +14,7 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+
 import java.time.LocalDateTime;
 import java.util.Map;
 
@@ -119,11 +119,9 @@ public class AuthUserService {
         // kakao_account에서 개인정보 추출
         Map<String, Object> kakaoAccount = (Map<String, Object>) responseData.get("kakao_account");
         String email = null;
-        String gender = null;
 
         if (kakaoAccount != null) {
             email = (String) kakaoAccount.get("email");
-            gender = (String) kakaoAccount.get("gender");
         }
 
         // kakaoUserResDTO 객체 생성 후 반환
@@ -131,7 +129,6 @@ public class AuthUserService {
                 .id(id)
                 .nickname(nickname)
                 .email(email)
-                .gender(gender)
                 .build();
     }
 
@@ -189,9 +186,7 @@ public class AuthUserService {
                             .provider(kakaoId)
                             .nickname(kakaoUserResDTO.getNickname())
                             .email(kakaoUserResDTO.getEmail())
-                            .gender(Gender.valueOf(convertGender(kakaoUserResDTO.getGender())))
-                            .birth(kakaoUserResDTO.getBirthYear())
-//                            .auth(Auth.USER)  // 기본값
+                            .auth(UserAuthority.USER)  // 기본값
                             .createdAt(LocalDateTime.now())
                             .build();
 
@@ -199,17 +194,7 @@ public class AuthUserService {
                 });
     }
 
-    //    카카오 성별 정보를 우리 시스템 형식으로 변환
-    private String convertGender(String kakaoGender) {
-        if ("female".equals(kakaoGender)) {
-            return "WOMAN";
-        } else if ("male".equals(kakaoGender)) {
-            return "MAN";
-        }
-        return "MAN"; // 기본값
-    }
-
-//    토큰 유효성 검증 메서드
+    //    토큰 유효성 검증 메서드
     public boolean validateToken(String token) {
         try {
             return jwtUtil.validateToken(token);

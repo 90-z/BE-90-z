@@ -9,6 +9,8 @@ import com.be90z.domain.recipe.entity.ImageCategory;
 import com.be90z.domain.recipe.entity.Ingredients;
 import com.be90z.domain.recipe.entity.Recipe;
 import com.be90z.domain.recipe.repository.RecipeRepository;
+import com.be90z.domain.recipeTag.dto.RecipeTagResDTO;
+import com.be90z.domain.recipeTag.service.RecipeTagService;
 import com.be90z.domain.tag.service.TagService;
 import com.be90z.domain.user.repository.UserRepository;
 import com.be90z.external.gemini.service.GeminiResParser;
@@ -33,6 +35,7 @@ public class RecipeService {
     private final UserRepository userRepository;
     private final TagService tagService;
     private final GeminiResParser geminiResParser;
+    private final RecipeTagService recipeTagService;
 
     //   AI로 레시피 분석
     @Transactional
@@ -213,6 +216,7 @@ public class RecipeService {
              throw new RuntimeException("레시피 삭제 권한이 없습니다.");
          } */
 
+        recipeTagService.deleteRecipeTags(recipeCode);
         imageService.deleteAllImagesByRecipe(recipeCode);
         recipeRepository.delete(recipe);
     }
@@ -264,6 +268,15 @@ public class RecipeService {
                 .collect(Collectors.toList());
 
         recipeResDTO.setImagesList(imagesList);
+
+        // 🔥 레시피 태그 정보 추가
+        List<RecipeTagResDTO> recipeTags = recipeTagService.getRecipeTags(recipe.getRecipeCode());
+        List<RecipeResDTO.RecipeTagResDTO> recipeTagList = recipeTags.stream()
+                .map(tag -> new RecipeResDTO.RecipeTagResDTO(tag.getRecipeTagCode(), tag.getRecipeTagName()))
+                .collect(Collectors.toList());
+
+        recipeResDTO.setRecipeTagList(recipeTagList);
+
         return recipeResDTO;
     }
 }

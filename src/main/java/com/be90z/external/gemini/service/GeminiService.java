@@ -2,6 +2,7 @@ package com.be90z.external.gemini.service;
 
 import com.be90z.external.gemini.dto.GeminiReqDTO;
 import com.be90z.external.gemini.dto.GeminiResDTO;
+import com.be90z.external.gemini.prompt.GeminiIngredientPrompt;
 import com.be90z.external.gemini.prompt.GeminiRecipePrompt;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,7 +25,9 @@ public class GeminiService {
     private final String geminiApiKey;
 
     private final GeminiRecipePrompt geminiRecipePrompt;
+    private final GeminiIngredientPrompt geminiIngredientPrompt;
 
+    //    레시피 분석
     public String analyzeRecipe(String recipeName, String recipeContent) {
         log.info("Gemini 레시피 분석 요청 - 제목: '{}', 내용 길이: {} 문자",
                 recipeName != null ? recipeName : "(제목 없음)", recipeContent.length());
@@ -56,6 +59,40 @@ public class GeminiService {
         }
 
     }
+
+    //    재료 추출
+    public String extractIngredientsForTags(String recipeName, String recipeContent) {
+        log.info("Gemini 태그용 재료 추출 요청 - 제목: '{}', 내용 길이: {} 문자",
+                recipeName != null ? recipeName : "(제목 없음)", recipeContent.length());
+
+        try {
+            if (!geminiIngredientPrompt.isValidInput(recipeName, recipeContent)) {
+                log.warn("재료 추출 입력이 유효하지 않음 - 내용 길이: {} 문자", recipeContent.length());
+                throw new IllegalArgumentException("레시피 내용이 너무 짧거나 깁니다");
+            }
+
+            // 재료 추출용 프롬프트 생성
+            String prompt = geminiIngredientPrompt.createIngredientExtractionPrompt(recipeName, recipeContent);
+
+            // Gemini API 호출
+            String responseGemini = callGeminiApi(prompt);
+
+            if (responseGemini != null && !responseGemini.trim().isEmpty()) {
+                log.info("Gemini 재료 추출 성공");
+                return responseGemini;
+            } else {
+                log.warn("Gemini 재료 추출 응답 비어있음");
+                return null;
+            }
+        } catch (IllegalArgumentException e) {
+            log.error("재료 추출 입력 검증 실패: {} ", e.getMessage());
+            throw e;
+        } catch (Exception e) {
+            log.error("Gemini 재료 추출 중 오류 발생: {}", e.getMessage(), e);
+            throw new RuntimeException("AI 재료 추출 실패", e);
+        }
+    }
+
 
     //    Gemini 호출
     private String callGeminiApi(String prompt) {
