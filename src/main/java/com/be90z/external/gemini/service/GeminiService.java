@@ -29,37 +29,37 @@ public class GeminiService {
     private final GeminiIngredientPrompt geminiIngredientPrompt;
 
     //    레시피 분석
-    public String analyzeRecipe(String recipeName, String recipeContent) {
-        log.info("Gemini 레시피 분석 요청 - 제목: '{}', 내용 길이: {} 문자",
-                recipeName != null ? recipeName : "(제목 없음)", recipeContent.length());
-
-        try {
-            if (!geminiRecipePrompt.isValidInput(recipeName, recipeContent)) {
-                log.warn("레시피 입력이 유효하지 않음 - 내용 길이: {} 문자", recipeContent.length());
-                throw new IllegalArgumentException("레시피 내용이 너무 짧거나 깁니다");
-            }
-//            프롬프트 생성
-            String prompt = geminiRecipePrompt.createGeminiRecipePrompt(recipeName, recipeContent);
-
-//            Gemini API 호출
-            String responseGemini = callGeminiApi(prompt);
-
-            if (responseGemini != null && !responseGemini.trim().isEmpty()) {
-                log.info("Gemini 레시피 분석 성공");
-                return responseGemini;
-            } else {
-                log.warn("Gemini api 응답 비어있음");
-                return null;
-            }
-        } catch (IllegalArgumentException e) {
-            log.error("입력 검증 실패: {} ", e.getMessage());
-            throw e;
-        } catch (Exception e) {
-            log.error("Gemini 레시피 분석 중 오류 발생: {}", e.getMessage(), e);
-            throw new RuntimeException("AI 레시피 분석 실패", e);
-        }
-
-    }
+//    public String analyzeRecipe(String recipeName, String recipeContent) {
+//        log.info("Gemini 레시피 분석 요청 - 제목: '{}', 내용 길이: {} 문자",
+//                recipeName != null ? recipeName : "(제목 없음)", recipeContent.length());
+//
+//        try {
+//            if (!geminiRecipePrompt.isValidInput(recipeName, recipeContent)) {
+//                log.warn("레시피 입력이 유효하지 않음 - 내용 길이: {} 문자", recipeContent.length());
+//                throw new IllegalArgumentException("레시피 내용이 너무 짧거나 깁니다");
+//            }
+////            프롬프트 생성
+//            String prompt = geminiRecipePrompt.createGeminiRecipePrompt(recipeName, recipeContent);
+//
+////            Gemini API 호출
+//            String responseGemini = callGeminiApi(prompt);
+//
+//            if (responseGemini != null && !responseGemini.trim().isEmpty()) {
+//                log.info("Gemini 레시피 분석 성공");
+//                return responseGemini;
+//            } else {
+//                log.warn("Gemini api 응답 비어있음");
+//                return null;
+//            }
+//        } catch (IllegalArgumentException e) {
+//            log.error("입력 검증 실패: {} ", e.getMessage());
+//            throw e;
+//        } catch (Exception e) {
+//            log.error("Gemini 레시피 분석 중 오류 발생: {}", e.getMessage(), e);
+//            throw new RuntimeException("AI 레시피 분석 실패", e);
+//        }
+//
+//    }
 
     //    재료 추출
     public String extractIngredientsForTags(String recipeName, String recipeContent) {
