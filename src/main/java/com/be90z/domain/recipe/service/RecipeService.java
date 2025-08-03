@@ -15,11 +15,11 @@ import com.be90z.domain.tag.service.TagService;
 import com.be90z.domain.user.repository.UserRepository;
 import com.be90z.external.gemini.service.GeminiResParser;
 import com.be90z.external.gemini.service.GeminiService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import reactor.core.publisher.Mono;
 
 import java.io.IOException;
 import java.util.List;
@@ -38,18 +38,28 @@ public class RecipeService {
     private final RecipeTagService recipeTagService;
 
     //   AI로 레시피 분석
+//    @Transactional
+//    public RecipeAiResDTO createRecipeWithAi(RecipeCreateFreeDTO recipeCreateFreeDTO) throws IOException {
+//        String geminiResJson = geminiService.analyzeRecipe(
+//                recipeCreateFreeDTO.getRecipeName(),
+//                recipeCreateFreeDTO.getRecipeContent()
+//        );
+//        return geminiResParser.parseResponse(geminiResJson, RecipeAiResDTO.class);
+//    }
+
+    //    레시피 분석 비동기로
     @Transactional
-    public RecipeAiResDTO createRecipeWithAi(RecipeCreateFreeDTO recipeCreateFreeDTO) throws IOException {
-        String geminiResJson = geminiService.analyzeRecipe(
+    public Mono<RecipeAiResDTO> createRecipeWithAiAsync(RecipeCreateFreeDTO recipeCreateFreeDTO) throws IOException {
+        return geminiService.analyzeRecipeAsync(
                 recipeCreateFreeDTO.getRecipeName(),
                 recipeCreateFreeDTO.getRecipeContent()
-        );
-
-//        AI 결과 Json > DTO 변환
-//        ObjectMapper objectMapper = new ObjectMapper();
-//        RecipeAiResDTO recipeAiResDTO = objectMapper.readValue(geminiResJson, RecipeAiResDTO.class);
-//        return recipeAiResDTO;
-        return geminiResParser.parseReponse(geminiResJson, RecipeAiResDTO.class);
+        ).map(geminiResJson -> {
+            try {
+                return geminiResParser.parseReponse(geminiResJson, RecipeAiResDTO.class);
+            } catch (Exception e) {
+                throw new RuntimeException("JSON 파싱 실패 : ", e);
+            }
+        });
     }
 
     //    레시피 등록 - ai 후
@@ -63,9 +73,9 @@ public class RecipeService {
                 .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다: " + userId));
 
 //        요리방식 유효성 검증
-        if(recipeAiResDTO.getRecipeCookMethod() != null &&
-        !recipeAiResDTO.getRecipeCookMethod().trim().isEmpty() &&
-        !tagService.isValidTag(recipeAiResDTO.getRecipeCookMethod())) {
+        if (recipeAiResDTO.getRecipeCookMethod() != null &&
+                !recipeAiResDTO.getRecipeCookMethod().trim().isEmpty() &&
+                !tagService.isValidTag(recipeAiResDTO.getRecipeCookMethod())) {
             throw new RuntimeException("유효하지 않는 요리방식입니다.: " + recipeAiResDTO.getRecipeCookMethod());
         }
 
@@ -135,7 +145,7 @@ public class RecipeService {
      } */
 
         //        요리방식 유효성 검증
-        if(recipeUpdateDTO.getRecipeCookMethod() != null &&
+        if (recipeUpdateDTO.getRecipeCookMethod() != null &&
                 !recipeUpdateDTO.getRecipeCookMethod().trim().isEmpty() &&
                 !tagService.isValidTag(recipeUpdateDTO.getRecipeCookMethod())) {
             throw new RuntimeException("유효하지 않는 요리방식입니다.: " + recipeUpdateDTO.getRecipeCookMethod());
