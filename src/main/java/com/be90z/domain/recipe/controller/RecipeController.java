@@ -32,14 +32,6 @@ public class RecipeController {
     private final RecipeService recipeService;
     private final ObjectMapper objectMapper;
 
-//    @PostMapping("/ai")
-//    @Operation(summary = " AI 레시피 분석", description = "제목과 내용을 AI로 분석하여 레시피 상세 내용을 생성합니다")
-//    public ResponseEntity<RecipeAiResDTO> createRecipeWithAi(
-//            @RequestBody RecipeCreateFreeDTO recipeCreateFreeDTO) throws IOException {
-//        RecipeAiResDTO recipeAiResDTO = recipeService.createRecipeWithAi(recipeCreateFreeDTO);
-//        return ResponseEntity.ok(recipeAiResDTO);
-//    }
-
     @PostMapping("/ai")
     @Operation(summary = "AI 레시피 분석 - 비동기", description = "제목과 내용을 AI로 분석하여 레시피 상세 내용을 생성합니다.")
     public Mono<ResponseEntity<RecipeAiResDTO>> createRecipeWithAiAsync(
@@ -76,6 +68,37 @@ public class RecipeController {
         recipeService.createRecipe(recipeAiResDTO, images);
         return ResponseEntity.ok().body("레시피가 성공적으로 등록되었습니다.");
     }
+
+    @GetMapping("/search")
+    @Operation(summary = "키워드와 재료명으로 레시피 검색", description = "키워드와 재료명으로 레시피를 검색합니다.")
+    public ResponseEntity<List<RecipeResDTO>> searchRecipes(
+            @Parameter(description = "검색 키워드 (레시피 제목, 내용에서 검색합니다)")
+            @RequestParam(required = false) String keyword,
+
+            @Parameter(description = "검색 키워드(재료에서 검색합니다)")
+            @RequestParam(required = false) String ingredient) {
+        List<RecipeResDTO> recipeResDTOList = recipeService.searchRecipe(keyword, ingredient);
+        return ResponseEntity.ok(recipeResDTOList);
+    }
+
+    @GetMapping("/search/keyword")
+    @Operation(summary = "키워드 레시피 검색", description = "키워드로 레시피를 검색합니다.")
+    public ResponseEntity<List<RecipeResDTO>> searchRecipesByKeyword(
+            @Parameter(description = "검색할 키워드", required = true)
+            @RequestParam(required = false) String keyword) {
+        List<RecipeResDTO> recipeResDTOList = recipeService.searchRecipeByKeyword(keyword);
+        return ResponseEntity.ok(recipeResDTOList);
+    }
+
+    @GetMapping("/search/ingredient")
+    @Operation(summary = "재료 레시피 검색", description = "재료로 레시피를 검색합니다.")
+    public ResponseEntity<List<RecipeResDTO>> searchRecipesByIngredient(
+            @Parameter(description = "검색할 재료", required = true)
+            @RequestParam(required = false) String Ingredient) {
+        List<RecipeResDTO> recipeResDTOList = recipeService.searchRecipeByIngredient(Ingredient);
+        return ResponseEntity.ok(recipeResDTOList);
+    }
+
 
     @GetMapping
     @Operation(summary = "레시피 전체 조회", description = "등록된 모든 레시피를 조회합니다.")
