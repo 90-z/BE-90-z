@@ -13,6 +13,8 @@ public class RecipeResDTO {
     private Long recipeCode;
     private String recipeName;
     private List<RecipeTagResDTO> recipeTagList;
+    private Long userId;
+    private String authorNickname;
 
 
     @Lob
@@ -24,6 +26,22 @@ public class RecipeResDTO {
     private LocalDateTime createdAt;
     private List<IngredientsResDTO> ingredientsList;
     private List<ImageResDTO> imagesList;
+
+    public Long getUserId() {
+        return userId;
+    }
+
+    public String getAuthorNickname() {
+        return authorNickname;
+    }
+
+    public void setAuthorId(Long userId) {
+        this.userId = userId;
+    }
+
+    public void setAuthorNickname(String nickname) {
+        this.authorNickname = nickname;
+    }
 
     @Data
     public static class IngredientsResDTO {

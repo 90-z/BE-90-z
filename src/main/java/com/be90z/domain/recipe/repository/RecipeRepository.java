@@ -19,14 +19,16 @@ public interface RecipeRepository extends JpaRepository<Recipe, Long> {
     @Query("SELECT DISTINCT r from Recipe r " +
             "WHERE (:keyword IS NULL OR :keyword = '' OR " +
             "LOWER(r.recipeName) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
-            "LOWER(r.recipeContent) LIKE LOWER(CONCAT('%', :keyword, '%')))")
+            "LOWER(r.recipeContent) LIKE LOWER(CONCAT('%', :keyword, '%')))" +
+            "ORDER BY r.createdAt DESC ")
     List<Recipe> searchByRecipeKeyword(@Param("keyword") String keyword);
 
 //    재료명으로 검색
     @Query("SELECT DISTINCT r FROM Recipe r " +
             "JOIN r.ingredients i " +
             "WHERE (:ingredient IS NULL OR :ingredient = '' OR " +
-            "LOWER(i.ingredientsName) LIKE LOWER(CONCAT('%', :ingredient, '%')))")
+            "LOWER(i.ingredientsName) LIKE LOWER(CONCAT('%', :ingredient, '%')))" +
+            "ORDER BY r.createdAt DESC ")
     List<Recipe> searchByIngredient(@Param("ingredient") String ingredient);
 
 //    제목, 내용, 재료명으로 검색
@@ -36,7 +38,8 @@ public interface RecipeRepository extends JpaRepository<Recipe, Long> {
             "       LOWER(r.recipeName) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
             "       LOWER(r.recipeContent) LIKE LOWER(CONCAT('%', :keyword, '%')))" +
             "AND (:ingredient IS NULL OR :ingredient = '' OR " +
-            "LOWER(i.ingredientsName) LIKE LOWER(CONCAT('%', :ingredient, '%')))")
+            "LOWER(i.ingredientsName) LIKE LOWER(CONCAT('%', :ingredient, '%')))" +
+            "ORDER BY r.createdAt DESC ")
     List<Recipe> searchRecipeByKeywordAndIngredient(@Param("keyword") String keyword,
                                                     @Param("ingredient") String ingredient);
 
