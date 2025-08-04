@@ -20,6 +20,10 @@ public class RaffleWinner {
     @Column(name = "winner_prize", nullable = false)
     private String winnerPrize;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "winner_goods_status", nullable = false)
+    private WinnerGoodsStatus winnerGoodsStatus;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumns({
         @JoinColumn(name = "raffle_code", referencedColumnName = "raffle_code"),
@@ -28,7 +32,8 @@ public class RaffleWinner {
     private Raffle raffle;
 
     @Builder
-    public RaffleWinner(Long winnerCode, String winnerPrize, Raffle raffle) {
+    public RaffleWinner(Long winnerCode, String winnerPrize, WinnerGoodsStatus winnerGoodsStatus, 
+                       Raffle raffle) {
         if (raffle == null) {
             throw new IllegalArgumentException("Raffle cannot be null");
         }
@@ -38,6 +43,7 @@ public class RaffleWinner {
 
         this.winnerCode = winnerCode;
         this.winnerPrize = winnerPrize;
+        this.winnerGoodsStatus = winnerGoodsStatus != null ? winnerGoodsStatus : WinnerGoodsStatus.BEFORE_RECEIPT;
         this.raffle = raffle;
     }
 }

@@ -2,8 +2,8 @@ package com.be90z.domain.raffle.service;
 
 import com.be90z.domain.raffle.dto.response.RaffleListResDTO;
 import com.be90z.domain.raffle.dto.response.RaffleWinnerResDTO;
-import com.be90z.domain.raffle.entity.SimpleRaffle;
-import com.be90z.domain.raffle.repository.SimpleRaffleRepository;
+import com.be90z.domain.raffle.entity.Raffle;
+import com.be90z.domain.raffle.repository.RaffleRepository;
 import com.be90z.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -17,17 +17,16 @@ import java.util.ArrayList;
 @Transactional(readOnly = true)
 public class RaffleService {
 
-    private final SimpleRaffleRepository simpleRaffleRepository;
+    private final RaffleRepository raffleRepository;
     private final UserRepository userRepository;
 
     public List<RaffleListResDTO> getAllRaffles() {
-        List<SimpleRaffle> raffles = simpleRaffleRepository.findAll();
+        List<Raffle> raffles = raffleRepository.findAll();
         return raffles.stream()
                 .map(raffle -> RaffleListResDTO.builder()
-                        .raffleCode(raffle.getId())
+                        .raffleCode(raffle.getRaffleCode())
+                        .participateCode(raffle.getParticipateCode())
                         .raffleName(raffle.getRaffleName())
-                        .rafflePrizeCont(raffle.getRafflePrizeCont())
-                        .raffleWinner(raffle.getRaffleWinner())
                         .raffleDate(raffle.getRaffleDate())
                         .createdAt(raffle.getCreatedAt())
                         .build())
@@ -35,7 +34,7 @@ public class RaffleService {
     }
 
     public List<RaffleWinnerResDTO> getRaffleWinners(Long raffleCode) {
-        // SimpleRaffle을 사용하는 단순한 구현
+        // 실제 Raffle 엔티티를 사용하는 구현
         // 추후 실제 RaffleWinner 엔티티와 연결 시 수정 필요
         return new ArrayList<>();
     }
@@ -53,7 +52,9 @@ public class RaffleService {
     @Transactional
     public List<RaffleWinnerResDTO> drawRaffle(Long raffleCode) {
         // 래플 존재 여부 확인
-        if (!simpleRaffleRepository.existsById(raffleCode)) {
+        // RaffleId를 사용하여 존재 여부 확인
+        // 복합키이므로 실제로는 raffleCode와 participateCode 둘 다 필요
+        if (raffleRepository.findAll().stream().noneMatch(r -> r.getRaffleCode().equals(raffleCode))) {
             throw new IllegalArgumentException("Raffle not found with id: " + raffleCode);
         }
         // 래플 추첨 로직

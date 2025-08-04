@@ -31,12 +31,6 @@ public class Raffle {
     @Column(name = "raffle_name", nullable = false)
     private String raffleName;
 
-    @Column(name = "raffle_prize_cont")
-    private String rafflePrizeCont;
-
-    @Column(name = "raffle_winner", nullable = false)
-    private Integer raffleWinner = 1;
-
     @Column(name = "raffle_date", nullable = false)
     private LocalDateTime raffleDate;
 
@@ -45,8 +39,7 @@ public class Raffle {
 
     @Builder
     public Raffle(Long raffleCode, MissionParticipation participation, String raffleName, 
-                  String rafflePrizeCont, Integer raffleWinner, LocalDateTime raffleDate, 
-                  LocalDateTime createdAt) {
+                  LocalDateTime raffleDate, LocalDateTime createdAt) {
         if (raffleCode == null) {
             throw new IllegalArgumentException("Raffle code cannot be null");
         }
@@ -64,8 +57,6 @@ public class Raffle {
         this.participateCode = participation.getParticipateCode();
         this.participation = participation;
         this.raffleName = raffleName;
-        this.rafflePrizeCont = rafflePrizeCont;
-        this.raffleWinner = raffleWinner != null ? raffleWinner : 1;
         this.raffleDate = raffleDate;
         this.createdAt = createdAt != null ? createdAt : LocalDateTime.now();
     }

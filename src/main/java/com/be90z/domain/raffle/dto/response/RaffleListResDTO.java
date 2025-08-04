@@ -9,9 +9,8 @@ import java.time.LocalDateTime;
 @Builder
 public class RaffleListResDTO {
     private Long raffleCode;
+    private Long participateCode;
     private String raffleName;
-    private String rafflePrizeCont;
-    private Integer raffleWinner;
     private LocalDateTime raffleDate;
     private LocalDateTime createdAt;
 }
