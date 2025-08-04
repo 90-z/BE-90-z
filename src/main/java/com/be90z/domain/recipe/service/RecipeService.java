@@ -12,10 +12,12 @@ import com.be90z.domain.recipe.repository.RecipeRepository;
 import com.be90z.domain.recipeTag.dto.RecipeTagResDTO;
 import com.be90z.domain.recipeTag.service.RecipeTagService;
 import com.be90z.domain.tag.service.TagService;
+import com.be90z.domain.user.entity.User;
 import com.be90z.domain.user.repository.UserRepository;
 import com.be90z.external.gemini.service.GeminiResParser;
 import com.be90z.external.gemini.service.GeminiService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -25,6 +27,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class RecipeService {
@@ -54,13 +57,7 @@ public class RecipeService {
 
     //    레시피 등록 - ai 후
     @Transactional
-    public void createRecipe(RecipeAiResDTO recipeAiResDTO, List<MultipartFile> images) throws IOException {
-        // 🔥 임시로 user_id = 1 고정 (나중에 getCurrentUser()로 변경 예정)
-        Long userId = 1L;
-
-        // 🔥 실제 User 객체 조회
-        com.be90z.domain.user.entity.User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다: " + userId));
+    public void createRecipe(RecipeAiResDTO recipeAiResDTO, List<MultipartFile> images, User user) throws IOException {
 
 //        요리방식 유효성 검증
         if (recipeAiResDTO.getRecipeCookMethod() != null &&
@@ -128,11 +125,6 @@ public class RecipeService {
 
         Recipe recipe = recipeRepository.findById(recipeCode)
                 .orElseThrow(() -> new RuntimeException("수정할 레시피를 찾을 수 없습니다. : " + recipeCode));
-
-    /* 🔥 TODO: 나중에 현재 로그인한 사용자와 레시피 작성자가 같은지 검증 추가
-     if (!recipe.getUser().getUserId().equals(getCurrentUser().getUserId())) {
-         throw new RuntimeException("레시피 수정 권한이 없습니다.");
-     } */
 
         //        요리방식 유효성 검증
         if (recipeUpdateDTO.getRecipeCookMethod() != null &&
@@ -211,24 +203,10 @@ public class RecipeService {
     public void deleteRecipe(Long recipeCode) {
         Recipe recipe = recipeRepository.findById(recipeCode).orElseThrow(() -> new RuntimeException("삭제할 레시피를 찾을 수 없습니다. : " + recipeCode));
 
-        /*🔥 TODO: 나중에 현재 로그인한 사용자와 레시피 작성자가 같은지 검증 추가
-         if (!recipe.getUser().getUserId().equals(getCurrentUser().getUserId())) {
-             throw new RuntimeException("레시피 삭제 권한이 없습니다.");
-         } */
-
         recipeTagService.deleteRecipeTags(recipeCode);
         imageService.deleteAllImagesByRecipe(recipeCode);
         recipeRepository.delete(recipe);
     }
-
-    /* 🔥 TODO: 나중에 JWT 토큰에서 현재 사용자 정보를 가져오는 메서드
-     private User getCurrentUser() {
-         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-         Long userId = Long.valueOf(authentication.getName());
-         return userRepository.findById(userId)
-                 .orElseThrow(() -> new RuntimeException("인증된 사용자를 찾을 수 없습니다."));
-     } */
-
 
     //    Recipe Entity를 ResponseDTO로 변환하는 메서드
     public RecipeResDTO convertToResponseDTO(Recipe recipe) {
@@ -241,6 +219,12 @@ public class RecipeService {
         recipeResDTO.setRecipePeople(recipe.getRecipePeople());
         recipeResDTO.setRecipeTime(recipe.getRecipeTime());
         recipeResDTO.setCreatedAt(recipe.getCreatedAt());
+
+        // 작성자 정보 추가
+        if (recipe.getUser() != null) {
+            recipeResDTO.setAuthorId(recipe.getUser().getUserId());
+            recipeResDTO.setAuthorNickname(recipe.getUser().getNickname());
+        }
 
 //        재료 리스트를 DTO 변환
         List<RecipeResDTO.IngredientsResDTO> ingrdientssList = recipe.getIngredients().stream()
@@ -317,5 +301,17 @@ public class RecipeService {
         return recipes.stream()
                 .map(this::convertToResponseDTO)
                 .collect(Collectors.toList());
+    }
+
+//    작성자 권환 확인 메서드
+    @Transactional(readOnly = true)
+    public boolean isRecipeOwner(Long recipeCode, Long userId) {
+        Recipe recipe = recipeRepository.findById(recipeCode)
+                .orElseThrow(() -> new RuntimeException("레시피를 찾을 수 없습니다.: " + recipeCode));
+
+        boolean isOwner = recipe.getUser().getUserId().equals(userId);
+        log.info("작성자 권한 확인 - 레시피: {}, 요청자: {}, 작성자: {}, 권한: {}", recipeCode, userId, recipe.getUser().getUserId(), isOwner);
+
+        return isOwner;
     }
 }

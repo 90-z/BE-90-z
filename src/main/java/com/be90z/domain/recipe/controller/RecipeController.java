@@ -5,6 +5,9 @@ import com.be90z.domain.recipe.dto.RecipeCreateFreeDTO;
 import com.be90z.domain.recipe.dto.RecipeResDTO;
 import com.be90z.domain.recipe.dto.RecipeUpdateDTO;
 import com.be90z.domain.recipe.service.RecipeService;
+import com.be90z.domain.user.dto.response.AuthErrorResDTO;
+import com.be90z.domain.user.entity.User;
+import com.be90z.global.util.AuthUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -12,6 +15,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -31,41 +35,44 @@ public class RecipeController {
 
     private final RecipeService recipeService;
     private final ObjectMapper objectMapper;
+    private final AuthUtil authUtil;
 
     @PostMapping("/ai")
-    @Operation(summary = "AI 레시피 분석 - 비동기", description = "제목과 내용을 AI로 분석하여 레시피 상세 내용을 생성합니다.")
-    public Mono<ResponseEntity<RecipeAiResDTO>> createRecipeWithAiAsync(
-            @RequestBody RecipeCreateFreeDTO recipeCreateFreeDTO) throws IOException {
+    @Operation(summary = "AI 레시피 분석 - 비동기 (회원 전용)", description = "제목과 내용을 AI로 분석하여 레시피 상세 내용을 생성합니다.")
+    public Mono<ResponseEntity<?>> createRecipeWithAiAsync(
+            @RequestBody RecipeCreateFreeDTO recipeCreateFreeDTO,
+            @RequestHeader(value = "Authorization", required = false) String token) throws IOException {
+
+//        회원 권한 체크
+        if (!authUtil.isValidToken(token)) {
+            return Mono.just(ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(AuthErrorResDTO.unauthorized()));
+        }
+
         return recipeService.createRecipeWithAiAsync(recipeCreateFreeDTO)
-                .map(ResponseEntity::ok)
-                .doOnSuccess(response -> log.info("비동기 AI 레시피 분석 완료"))
-                .doOnError(error -> log.error("비동기 AI 레시피 분석 실패: ", error.getMessage()));
+                .map(result -> ResponseEntity.ok((Object) result));
     }
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @Operation(
-            summary = "레시피 최종 등록",
-            description = "AI가 적용된 레시피를 등록합니다, 최소 1개 이상의 이미지가 필요합니다."
-    )
-    public ResponseEntity<String> createRecipe(
-            @Parameter(
-                    description = "레시피 정보",
-                    required = true,
-                    schema = @Schema(implementation = RecipeAiResDTO.class)
-            )
+    @Operation(summary = "레시피 최종 등록 (회원 전용)", description = "AI가 적용된 레시피를 등록합니다, 최소 1개 이상의 이미지가 필요합니다.")
+    public ResponseEntity<?> createRecipe(
+            @Parameter(description = "레시피 정보", required = true, schema = @Schema(implementation = RecipeAiResDTO.class))
             @RequestPart(value = "recipe", required = true) String recipeJson,
-
-            @Parameter(
-                    description = "레시피 이미지 파일들 (최소 1개 필수)",
-                    required = true
-            )
+            @Parameter(description = "레시피 이미지 파일들 (최소 1개 필수)", required = true)
             @RequestPart("images") List<MultipartFile> images,
-            @RequestParam(value = "userId", required = false, defaultValue = "1") Long userId
+            @RequestHeader(value = "Authorization", required = false) String token
     ) throws IOException {
+
+        //        회원 권한 체크
+        User user = authUtil.getUserFromToken(token);
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(AuthErrorResDTO.unauthorized());
+        }
 
         RecipeAiResDTO recipeAiResDTO = objectMapper.readValue(recipeJson, RecipeAiResDTO.class);
 
-        recipeService.createRecipe(recipeAiResDTO, images);
+        recipeService.createRecipe(recipeAiResDTO, images, user);
         return ResponseEntity.ok().body("레시피가 성공적으로 등록되었습니다.");
     }
 
@@ -74,7 +81,6 @@ public class RecipeController {
     public ResponseEntity<List<RecipeResDTO>> searchRecipes(
             @Parameter(description = "검색 키워드 (레시피 제목, 내용에서 검색합니다)")
             @RequestParam(required = false) String keyword,
-
             @Parameter(description = "검색 키워드(재료에서 검색합니다)")
             @RequestParam(required = false) String ingredient) {
         List<RecipeResDTO> recipeResDTOList = recipeService.searchRecipe(keyword, ingredient);
@@ -119,26 +125,27 @@ public class RecipeController {
             summary = "레시피 수정",
             description = "기존 레시피를 수정합니다."
     )
-    public ResponseEntity<String> updateRecipe(
+    public ResponseEntity<?> updateRecipe(
             @PathVariable Long recipeCode,
-            @Parameter(
-                    description = "수정할 레시피 정보 (JSON 문자열)",
-                    required = true,
-                    schema = @Schema(implementation = RecipeUpdateDTO.class)
-            )
+            @Parameter(description = "수정할 레시피 정보 (JSON 문자열)", required = true, schema = @Schema(implementation = RecipeUpdateDTO.class))
             @RequestPart(value = "recipe", required = true) String recipeUpdateJson,
-
-            @Parameter(
-                    description = "새로 추가할 이미지 파일들",
-                    schema = @Schema(type = "array", format = "binary")
-            )
+            @Parameter(description = "새로 추가할 이미지 파일들", schema = @Schema(type = "array", format = "binary"))
             @RequestPart(value = "images", required = false) List<MultipartFile> newImages,
+            @Parameter(description = "삭제할 이미지 ID들 (쉼표로 구분된 문자열, 예: '1,2,3')", schema = @Schema(type = "string", example = "1,2,3"))
+            @RequestParam(value = "deleteImageIds", required = false) String deleteImageIds,
+            @RequestHeader(value = "Authorization", required = false) String token) throws IOException {
 
-            @Parameter(
-                    description = "삭제할 이미지 ID들 (쉼표로 구분된 문자열, 예: '1,2,3')",
-                    schema = @Schema(type = "string", example = "1,2,3")
-            )
-            @RequestParam(value = "deleteImageIds", required = false) String deleteImageIds) throws IOException {
+        //        회원 권한 체크
+        User user = authUtil.getUserFromToken(token);
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(AuthErrorResDTO.unauthorized());
+        }
+//        작성자 권한 체크
+        if (!recipeService.isRecipeOwner(recipeCode, user.getUserId())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(AuthErrorResDTO.forbidden());
+        }
 
         RecipeUpdateDTO recipeUpdateDTO = objectMapper.readValue(recipeUpdateJson, RecipeUpdateDTO.class);
 
@@ -161,7 +168,19 @@ public class RecipeController {
 
     @DeleteMapping("/{recipeCode}")
     @Operation(summary = "레시피 삭제", description = "특정 레시피를 삭제합니다.")
-    public ResponseEntity<String> deleteRecipe(@PathVariable Long recipeCode) {
+    public ResponseEntity<?> deleteRecipe(@PathVariable Long recipeCode, @RequestHeader(value = "Authorization", required = false) String token) {
+
+        //        회원 권한 체크
+        User user = authUtil.getUserFromToken(token);
+        if(user == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(AuthErrorResDTO.unauthorized());
+        }
+//        작성자 권한 체크
+        if(!recipeService.isRecipeOwner(recipeCode, user.getUserId())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(AuthErrorResDTO.forbidden());
+        }
         recipeService.deleteRecipe(recipeCode);
         return ResponseEntity.ok().body("레시피가 성공적으로 삭제되었습니다.");
     }
