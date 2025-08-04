@@ -18,6 +18,7 @@ import com.be90z.external.gemini.service.GeminiResParser;
 import com.be90z.external.gemini.service.GeminiService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -104,6 +105,7 @@ public class RecipeService {
     //    레시피 전체 조회
     @Transactional(readOnly = true)
     public List<RecipeResDTO> getAllRecipe() {
+        Sort sort = Sort.by(Sort.Direction.DESC, "createdAt");
         List<Recipe> recipes = recipeRepository.findAll();
         return recipes.stream()
                 .map(this::convertToResponseDTO)
