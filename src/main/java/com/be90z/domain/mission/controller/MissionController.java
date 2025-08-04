@@ -2,11 +2,15 @@ package com.be90z.domain.mission.controller;
 
 import com.be90z.domain.mission.dto.request.MissionCreateReqDTO;
 import com.be90z.domain.mission.dto.request.MissionJoinReqDTO;
+import com.be90z.domain.mission.dto.request.MissionReplyReqDTO;
+import com.be90z.domain.mission.dto.request.MissionRegistrationReqDTO;
 import com.be90z.domain.mission.dto.request.MissionUpdateReqDTO;
 import com.be90z.domain.mission.dto.response.MissionCreateResDTO;
 import com.be90z.domain.mission.dto.response.MissionDetailResDTO;
 import com.be90z.domain.mission.dto.response.MissionJoinResDTO;
 import com.be90z.domain.mission.dto.response.MissionListResDTO;
+import com.be90z.domain.mission.dto.response.MissionReplyResDTO;
+import com.be90z.domain.mission.dto.response.MissionRegistrationResDTO;
 import com.be90z.domain.mission.service.MissionService;
 import com.be90z.global.exception.NotFoundException;
 import io.swagger.v3.oas.annotations.Operation;
@@ -36,8 +40,12 @@ public class MissionController {
             @ApiResponse(responseCode = "200", description = "조회 성공"),
             @ApiResponse(responseCode = "500", description = "서버 에러")
     })
-    public ResponseEntity<List<MissionListResDTO>> getActiveMissions() {
-        List<MissionListResDTO> response = missionService.getAllActiveMissions();
+    public ResponseEntity<List<MissionListResDTO>> getActiveMissions(
+            @Parameter(description = "페이지 번호", example = "0")
+            @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "페이지 당 미션 수", example = "10")
+            @RequestParam(defaultValue = "10") int count) {
+        List<MissionListResDTO> response = missionService.getAllActiveMissions(page, count);
         return ResponseEntity.ok(response);
     }
 
@@ -183,6 +191,31 @@ public class MissionController {
             return ResponseEntity.badRequest().build();
         } catch (IllegalStateException e) {
             return ResponseEntity.status(409).build(); // Conflict
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    @PostMapping("/{missionCode}/reply")
+    @Operation(summary = "챌린지 등록", description = "특정 미션에 새로운 챌린지를 등록합니다")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "챌린지 등록 성공"),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청"),
+            @ApiResponse(responseCode = "404", description = "미션을 찾을 수 없음")
+    })
+    public ResponseEntity<MissionRegistrationResDTO> registerMissionChallenge(
+            @Parameter(description = "미션 코드", required = true)
+            @PathVariable Long missionCode,
+            @Parameter(description = "챌린지 등록 요청 정보", required = true)
+            @Valid @RequestBody MissionRegistrationReqDTO request) {
+        
+        try {
+            MissionRegistrationResDTO response = missionService.registerMissionChallenge(missionCode, request);
+            return ResponseEntity.ok(response);
+        } catch (NotFoundException e) {
+            return ResponseEntity.notFound().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
         } catch (Exception e) {
             return ResponseEntity.internalServerError().build();
         }

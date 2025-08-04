@@ -10,22 +10,18 @@ import java.time.LocalDateTime;
 public class MissionListResDTO {
     
     private final Long missionCode;
-    private final String missionName;
     private final String missionContent;
-    private final MissionStatus missionStatus;
-    private final Integer missionMax;
+    private final Integer missionGoalCount;
     private final LocalDateTime startDate;
     private final LocalDateTime endDate;
     private final Integer currentParticipants;
     
     @Builder
-    public MissionListResDTO(Long missionCode, String missionName, String missionContent, MissionStatus missionStatus,
-                           Integer missionMax, LocalDateTime startDate, LocalDateTime endDate, Integer currentParticipants) {
+    public MissionListResDTO(Long missionCode, String missionContent, Integer missionGoalCount,
+                           LocalDateTime startDate, LocalDateTime endDate, Integer currentParticipants) {
         this.missionCode = missionCode;
-        this.missionName = missionName;
         this.missionContent = missionContent;
-        this.missionStatus = missionStatus;
-        this.missionMax = missionMax;
+        this.missionGoalCount = missionGoalCount;
         this.startDate = startDate;
         this.endDate = endDate;
         this.currentParticipants = currentParticipants != null ? currentParticipants : 0;
