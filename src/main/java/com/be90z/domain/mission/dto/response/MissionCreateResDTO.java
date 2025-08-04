@@ -16,17 +16,11 @@ public class MissionCreateResDTO {
     @Schema(description = "생성된 미션 코드", example = "1")
     private Long missionCode;
     
-    @Schema(description = "미션명", example = "건강한 하루 보내기")
-    private String missionName;
-    
     @Schema(description = "미션 내용", example = "매일 물 2L 마시기")
     private String missionContent;
     
-    @Schema(description = "미션 상태", example = "ACTIVE")
-    private MissionStatus missionStatus;
-    
-    @Schema(description = "최대 참가자 수 (mission_max)", example = "100")
-    private Integer missionMax;
+    @Schema(description = "미션 목표 횟수 (mission_goal_count)", example = "1")
+    private Integer missionGoalCount;
     
     @Schema(description = "미션 시작일", example = "2025-07-26T00:00:00")
     private LocalDateTime startDate;
@@ -38,14 +32,11 @@ public class MissionCreateResDTO {
     private LocalDateTime createdAt;
     
     @Builder
-    public MissionCreateResDTO(Long missionCode, String missionName, String missionContent, 
-                               MissionStatus missionStatus, Integer missionMax,
+    public MissionCreateResDTO(Long missionCode, String missionContent, Integer missionGoalCount,
                                LocalDateTime startDate, LocalDateTime endDate, LocalDateTime createdAt) {
         this.missionCode = missionCode;
-        this.missionName = missionName;
         this.missionContent = missionContent;
-        this.missionStatus = missionStatus;
-        this.missionMax = missionMax;
+        this.missionGoalCount = missionGoalCount;
         this.startDate = startDate;
         this.endDate = endDate;
         this.createdAt = createdAt;

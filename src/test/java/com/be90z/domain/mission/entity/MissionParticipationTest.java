@@ -2,7 +2,6 @@ package com.be90z.domain.mission.entity;
 
 import com.be90z.domain.user.entity.User;
 import com.be90z.domain.user.entity.UserAuthority;
-import com.be90z.domain.user.entity.Gender;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
 import static org.assertj.core.api.Assertions.*;
@@ -23,16 +22,13 @@ class MissionParticipationTest {
                 .email("test@example.com")
                 .auth(UserAuthority.USER)
                 .createdAt(LocalDateTime.now())
-                .gender(Gender.MAN)
-                .birth(1990)
                 .build();
 
         Mission mission = Mission.builder()
                 .missionCode(1L)
-                .missionName("테스트 미션")
+                .missionName("테스트 미션 제목")
                 .missionContent("테스트 미션 내용")
-                .missionStatus(MissionStatus.ACTIVE)
-                .missionMax(100)
+                .missionGoalCount(100)
                 .startDate(LocalDateTime.now())
                 .endDate(LocalDateTime.now().plusDays(30))
                 .createdAt(LocalDateTime.now())
@@ -40,11 +36,13 @@ class MissionParticipationTest {
 
         Long participateCode = 1L;
         ParticipateStatus participateStatus = ParticipateStatus.PART_BEFORE;
+        Integer participateCount = 0;
 
         // when
         MissionParticipation participation = MissionParticipation.builder()
                 .participateCode(participateCode)
                 .participateStatus(participateStatus)
+                .participateCount(participateCount)
                 .user(user)
                 .mission(mission)
                 .build();
@@ -52,6 +50,7 @@ class MissionParticipationTest {
         // then
         assertThat(participation.getParticipateCode()).isEqualTo(participateCode);
         assertThat(participation.getParticipateStatus()).isEqualTo(participateStatus);
+        assertThat(participation.getParticipateCount()).isEqualTo(participateCount);
         assertThat(participation.getUser()).isEqualTo(user);
         assertThat(participation.getMission()).isEqualTo(mission);
     }
@@ -66,8 +65,6 @@ class MissionParticipationTest {
                 .nickname("테스트유저")
                 .email("test@example.com")
                 .auth(UserAuthority.USER)
-                .gender(Gender.MAN)
-                .birth(1990)
                 .createdAt(LocalDateTime.now())
                 .build();
 
