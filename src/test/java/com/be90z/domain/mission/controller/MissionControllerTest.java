@@ -3,7 +3,6 @@ package com.be90z.domain.mission.controller;
 import com.be90z.domain.mission.dto.request.MissionJoinReqDTO;
 import com.be90z.domain.mission.dto.response.MissionJoinResDTO;
 import com.be90z.domain.mission.dto.response.MissionListResDTO;
-import com.be90z.domain.mission.entity.MissionStatus;
 import com.be90z.domain.mission.service.MissionService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
@@ -45,10 +44,8 @@ class MissionControllerTest {
         // given
         MissionListResDTO mission1 = MissionListResDTO.builder()
                 .missionCode(1L)
-                .missionName("매일 물 8잔 마시기")
                 .missionContent("하루에 물 8잔을 마시고 인증샷을 올려주세요")
-                .missionStatus(MissionStatus.ACTIVE)
-                .missionMax(100)
+                .missionGoalCount(1)
                 .startDate(LocalDateTime.of(2025, 7, 1, 0, 0))
                 .endDate(LocalDateTime.of(2025, 7, 31, 23, 59))
                 .currentParticipants(45)
@@ -56,17 +53,15 @@ class MissionControllerTest {
 
         MissionListResDTO mission2 = MissionListResDTO.builder()
                 .missionCode(2L)
-                .missionName("운동하기")
                 .missionContent("매일 30분 운동하기")
-                .missionStatus(MissionStatus.ACTIVE)
-                .missionMax(50)
+                .missionGoalCount(1)
                 .startDate(LocalDateTime.of(2025, 7, 1, 0, 0))
                 .endDate(LocalDateTime.of(2025, 7, 31, 23, 59))
                 .currentParticipants(20)
                 .build();
 
         List<MissionListResDTO> mockResponse = List.of(mission1, mission2);
-        given(missionService.getAllActiveMissions()).willReturn(mockResponse);
+        given(missionService.getAllActiveMissions(0, 10)).willReturn(mockResponse);
 
         // when & then
         mockMvc.perform(get("/api/v1/mission")
@@ -76,10 +71,10 @@ class MissionControllerTest {
                 .andExpect(jsonPath("$").isArray())
                 .andExpect(jsonPath("$.length()").value(2))
                 .andExpect(jsonPath("$[0].missionCode").value(1))
-                .andExpect(jsonPath("$[0].missionName").value("매일 물 8잔 마시기"))
+                .andExpect(jsonPath("$[0].missionContent").value("하루에 물 8잔을 마시고 인증샷을 올려주세요"))
                 .andExpect(jsonPath("$[0].currentParticipants").value(45))
                 .andExpect(jsonPath("$[1].missionCode").value(2))
-                .andExpect(jsonPath("$[1].missionName").value("운동하기"))
+                .andExpect(jsonPath("$[1].missionContent").value("매일 30분 운동하기"))
                 .andExpect(jsonPath("$[1].currentParticipants").value(20));
     }
 

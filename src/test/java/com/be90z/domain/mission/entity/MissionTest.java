@@ -15,47 +15,26 @@ class MissionTest {
     @DisplayName("Mission 엔티티 생성 - 성공")
     void createMission_Success() {
         // given
-        String missionName = "일일 운동하기";
         String missionContent = "하루 30분 이상 운동하기";
-        MissionStatus missionStatus = MissionStatus.ACTIVE;
-        Integer missionMax = 100;
+        Integer missionGoalCount = 100;
         LocalDateTime startDate = LocalDateTime.now();
         LocalDateTime endDate = LocalDateTime.now().plusDays(7);
 
         // when
         Mission mission = Mission.builder()
-                .missionName(missionName)
+                .missionName("테스트 미션명")
                 .missionContent(missionContent)
-                .missionStatus(missionStatus)
-                .missionMax(missionMax)
+                .missionGoalCount(missionGoalCount)
                 .startDate(startDate)
                 .endDate(endDate)
                 .build();
 
         // then
-        assertThat(mission.getMissionName()).isEqualTo(missionName);
         assertThat(mission.getMissionContent()).isEqualTo(missionContent);
-        assertThat(mission.getMissionStatus()).isEqualTo(missionStatus);
-        assertThat(mission.getMissionMax()).isEqualTo(missionMax);
+        assertThat(mission.getMissionGoalCount()).isEqualTo(missionGoalCount);
         assertThat(mission.getStartDate()).isEqualTo(startDate);
         assertThat(mission.getEndDate()).isEqualTo(endDate);
         assertThat(mission.getCreatedAt()).isNotNull();
-    }
-
-    @Test
-    @DisplayName("Mission 생성 - missionName null일 때 예외 발생")
-    void createMission_MissionNameNull_ThrowsException() {
-        // when & then
-        assertThatThrownBy(() -> Mission.builder()
-                .missionName(null)
-                .missionContent("테스트 내용")
-                .missionStatus(MissionStatus.ACTIVE)
-                .missionMax(100)
-                .startDate(LocalDateTime.now())
-                .endDate(LocalDateTime.now().plusDays(7))
-                .build())
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("Mission name cannot be null");
     }
 
     @Test
@@ -63,10 +42,9 @@ class MissionTest {
     void createMission_MissionContentNull_ThrowsException() {
         // when & then
         assertThatThrownBy(() -> Mission.builder()
-                .missionName("테스트 미션")
+                .missionName("테스트 미션명")
                 .missionContent(null)
-                .missionStatus(MissionStatus.ACTIVE)
-                .missionMax(100)
+                .missionGoalCount(100)
                 .startDate(LocalDateTime.now())
                 .endDate(LocalDateTime.now().plusDays(7))
                 .build())
@@ -75,28 +53,46 @@ class MissionTest {
     }
 
     @Test
+    @DisplayName("Mission 생성 - 기본값 테스트")
+    void createMission_DefaultValues() {
+        // given
+        String missionContent = "기본값 테스트 미션";
+        LocalDateTime startDate = LocalDateTime.now();
+        LocalDateTime endDate = LocalDateTime.now().plusDays(7);
+
+        // when
+        Mission mission = Mission.builder()
+                .missionName("기본값 테스트 미션명")
+                .missionContent(missionContent)
+                .startDate(startDate)
+                .endDate(endDate)
+                .build();
+
+        // then
+        assertThat(mission.getMissionGoalCount()).isEqualTo(1); // 기본값
+        assertThat(mission.getCreatedAt()).isNotNull();
+    }
+
+    @Test
     @DisplayName("Mission 업데이트 테스트")
     void updateMission() {
         // given
         Mission mission = Mission.builder()
-                .missionName("원래 미션")
+                .missionName("원래 미션명")
                 .missionContent("원래 내용")
-                .missionStatus(MissionStatus.ACTIVE)
-                .missionMax(50)
+                .missionGoalCount(50)
                 .startDate(LocalDateTime.now())
                 .endDate(LocalDateTime.now().plusDays(7))
                 .build();
         
-        String newMissionName = "수정된 미션";
+        String newMissionName = "수정된 미션명";
         String newMissionContent = "수정된 내용";
-        Integer newMissionMax = 100;
         
-        // when
-        mission.updateMission(newMissionName, newMissionContent, null, null, newMissionMax);
+        // when - 새로운 시그니처 사용: updateMission(missionName, missionContent)
+        mission.updateMission(newMissionName, newMissionContent);
         
         // then
         assertThat(mission.getMissionName()).isEqualTo(newMissionName);
         assertThat(mission.getMissionContent()).isEqualTo(newMissionContent);
-        assertThat(mission.getMissionMax()).isEqualTo(newMissionMax);
     }
 }

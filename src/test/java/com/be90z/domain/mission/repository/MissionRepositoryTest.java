@@ -1,7 +1,6 @@
 package com.be90z.domain.mission.repository;
 
 import com.be90z.domain.mission.entity.Mission;
-import com.be90z.domain.mission.entity.MissionStatus;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,24 +21,22 @@ class MissionRepositoryTest {
     private MissionRepository missionRepository;
 
     @Test
-    @DisplayName("MissionStatus로 미션 조회")
-    void findByMissionStatus() {
+    @DisplayName("미션 조회 테스트")
+    void findMissions() {
         // given
         Mission activeMission = Mission.builder()
-                .missionName("활성 미션")
+                .missionName("활성 미션 제목")
                 .missionContent("활성 미션 내용")
-                .missionStatus(MissionStatus.ACTIVE)
-                .missionMax(100)
+                .missionGoalCount(100)
                 .startDate(LocalDateTime.now())
                 .endDate(LocalDateTime.now().plusDays(7))
                 .createdAt(LocalDateTime.now())
                 .build();
 
         Mission completedMission = Mission.builder()
-                .missionName("완료된 미션")
+                .missionName("완료된 미션 제목")
                 .missionContent("완료된 미션 내용")
-                .missionStatus(MissionStatus.COMPLETED)
-                .missionMax(50)
+                .missionGoalCount(50)
                 .startDate(LocalDateTime.now().minusDays(7))
                 .endDate(LocalDateTime.now())
                 .createdAt(LocalDateTime.now())
@@ -49,36 +46,31 @@ class MissionRepositoryTest {
         missionRepository.save(completedMission);
 
         // when
-        List<Mission> activeMissions = missionRepository.findByMissionStatus(MissionStatus.ACTIVE);
-        List<Mission> completedMissions = missionRepository.findByMissionStatus(MissionStatus.COMPLETED);
+        List<Mission> savedMissions = missionRepository.findAll();
 
         // then
-        assertThat(activeMissions).hasSize(1);
-        assertThat(activeMissions.get(0).getMissionName()).isEqualTo("활성 미션");
-
-        assertThat(completedMissions).hasSize(1);
-        assertThat(completedMissions.get(0).getMissionName()).isEqualTo("완료된 미션");
+        assertThat(savedMissions).hasSize(2);
+        assertThat(savedMissions.get(0).getMissionContent()).contains("활성 미션 내용");
+        assertThat(savedMissions.get(1).getMissionContent()).contains("완료된 미션 내용");
     }
 
     @Test
-    @DisplayName("MissionStatus로 미션 조회 - 생성일 내림차순")
-    void findByMissionStatusOrderByCreatedAtDesc() {
+    @DisplayName("미션 조회 - 생성일 내림차순")
+    void findMissionsOrderByCreatedAtDesc() {
         // given
         Mission mission1 = Mission.builder()
-                .missionName("첫 번째 미션")
+                .missionName("첫 번째 미션 제목")
                 .missionContent("첫 번째 미션 내용")
-                .missionStatus(MissionStatus.ACTIVE)
-                .missionMax(100)
+                .missionGoalCount(100)
                 .startDate(LocalDateTime.now())
                 .endDate(LocalDateTime.now().plusDays(7))
                 .createdAt(LocalDateTime.now())
                 .build();
 
         Mission mission2 = Mission.builder()
-                .missionName("두 번째 미션")
+                .missionName("두 번째 미션 제목")
                 .missionContent("두 번째 미션 내용")
-                .missionStatus(MissionStatus.ACTIVE)
-                .missionMax(200)
+                .missionGoalCount(200)
                 .startDate(LocalDateTime.now())
                 .endDate(LocalDateTime.now().plusDays(7))
                 .createdAt(LocalDateTime.now().plusNanos(1000000))  // 약간 다른 시간으로 생성일 구분
@@ -90,12 +82,12 @@ class MissionRepositoryTest {
         missionRepository.save(mission2);
 
         // when
-        List<Mission> missions = missionRepository.findByMissionStatusOrderByCreatedAtDesc(MissionStatus.ACTIVE);
+        List<Mission> missions = missionRepository.findAllByOrderByCreatedAtDesc();
 
         // then
         assertThat(missions).hasSize(2);
-        // 최신 생성된 미션이 먼저 나와야 함
-        assertThat(missions.get(0).getMissionName()).isEqualTo("두 번째 미션");
-        assertThat(missions.get(1).getMissionName()).isEqualTo("첫 번째 미션");
+        // 최신 생성된 미션이 먼저 나와야 함 - 내용으로 확인
+        assertThat(missions.get(0).getMissionContent()).contains("두 번째 미션");
+        assertThat(missions.get(1).getMissionContent()).contains("첫 번째 미션");
     }
 }

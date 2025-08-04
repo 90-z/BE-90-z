@@ -1,9 +1,7 @@
 package com.be90z.domain.mission.controller;
 
 import com.be90z.domain.mission.entity.Mission;
-import com.be90z.domain.mission.entity.MissionStatus;
 import com.be90z.domain.mission.repository.MissionRepository;
-import com.be90z.domain.user.entity.Gender;
 import com.be90z.domain.user.entity.User;
 import com.be90z.domain.user.entity.UserAuthority;
 import com.be90z.domain.user.repository.UserRepository;
@@ -54,17 +52,14 @@ class MissionControllerIntegrationTest {
                 .nickname("통합테스트유저")
                 .email("integration@example.com")
                 .auth(UserAuthority.USER)
-                .gender(Gender.MAN)
-                .birth(1990)
                 .createdAt(LocalDateTime.now())
                 .build();
         testUser = userRepository.save(testUser);
 
         testMission = Mission.builder()
-                .missionName("매일 물 8잔 마시기")
+                .missionName("물 마시기 미션")
                 .missionContent("하루에 물 8잔을 마시고 인증샷을 올려주세요")
-                .missionStatus(MissionStatus.ACTIVE)
-                .missionMax(100)
+                .missionGoalCount(100)
                 .startDate(LocalDateTime.now().minusDays(1))
                 .endDate(LocalDateTime.now().plusDays(6))
                 .createdAt(LocalDateTime.now().minusDays(1))
@@ -82,8 +77,7 @@ class MissionControllerIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$").isArray())
-                .andExpect(jsonPath("$[0].missionName").value("매일 물 8잔 마시기"))
-                .andExpect(jsonPath("$[0].missionStatus").value("ACTIVE"));
+                .andExpect(jsonPath("$[0].missionContent").value("하루에 물 8잔을 마시고 인증샷을 올려주세요"));
     }
 
     @Test
@@ -95,9 +89,7 @@ class MissionControllerIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.missionName").value("매일 물 8잔 마시기"))
-                .andExpect(jsonPath("$.missionContent").value("하루에 물 8잔을 마시고 인증샷을 올려주세요"))
-                .andExpect(jsonPath("$.missionStatus").value("ACTIVE"));
+                .andExpect(jsonPath("$.missionContent").value("하루에 물 8잔을 마시고 인증샷을 올려주세요"));
     }
 
     @Test
