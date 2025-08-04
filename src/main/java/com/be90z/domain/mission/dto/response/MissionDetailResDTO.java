@@ -14,17 +14,14 @@ public class MissionDetailResDTO {
     @Schema(description = "미션 코드", example = "1")
     private final Long missionCode;
     
-    @Schema(description = "미션명", example = "건강한 하루 보내기")
+    @Schema(description = "미션명", example = "물 마시기 미션")
     private final String missionName;
     
     @Schema(description = "미션 내용", example = "매일 물 2L 마시기")
     private final String missionContent;
     
-    @Schema(description = "미션 상태", example = "ACTIVE")
-    private final MissionStatus missionStatus;
-    
-    @Schema(description = "최대 참가자 수 (mission_max)", example = "100")
-    private final Integer missionMax;
+    @Schema(description = "미션 목표 횟수 (mission_goal_count)", example = "1")
+    private final Integer missionGoalCount;
     
     @Schema(description = "미션 시작일", example = "2025-07-26T00:00:00")
     private final LocalDateTime startDate;
@@ -42,14 +39,13 @@ public class MissionDetailResDTO {
     private final String participationStatus;
     
     @Builder
-    public MissionDetailResDTO(Long missionCode, String missionName, String missionContent, MissionStatus missionStatus,
-                             Integer missionMax, LocalDateTime startDate, LocalDateTime endDate, Integer currentParticipants,
+    public MissionDetailResDTO(Long missionCode, String missionName, String missionContent, Integer missionGoalCount,
+                             LocalDateTime startDate, LocalDateTime endDate, Integer currentParticipants,
                              Boolean isParticipating, String participationStatus) {
         this.missionCode = missionCode;
         this.missionName = missionName;
         this.missionContent = missionContent;
-        this.missionStatus = missionStatus;
-        this.missionMax = missionMax;
+        this.missionGoalCount = missionGoalCount;
         this.startDate = startDate;
         this.endDate = endDate;
         this.currentParticipants = currentParticipants != null ? currentParticipants : 0;
