@@ -186,7 +186,6 @@ public class AuthUserService {
                             .provider(kakaoId)
                             .nickname(kakaoUserResDTO.getNickname())
                             .email(kakaoUserResDTO.getEmail())
-                            .auth(UserAuthority.USER)  // 기본값
                             .createdAt(LocalDateTime.now())
                             .build();
 

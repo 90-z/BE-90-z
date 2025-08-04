@@ -1,8 +1,12 @@
 package com.be90z.domain.raffle.controller;
 
-import com.be90z.domain.raffle.entity.SimpleRaffle;
-import com.be90z.domain.raffle.repository.SimpleRaffleRepository;
-import com.be90z.domain.user.entity.Gender;
+import com.be90z.domain.raffle.entity.Raffle;
+import com.be90z.domain.raffle.repository.RaffleRepository;
+import com.be90z.domain.mission.entity.Mission;
+import com.be90z.domain.mission.entity.MissionParticipation;
+import com.be90z.domain.mission.entity.ParticipateStatus;
+import com.be90z.domain.mission.repository.MissionRepository;
+import com.be90z.domain.mission.repository.MissionParticipationRepository;
 import com.be90z.domain.user.entity.User;
 import com.be90z.domain.user.entity.UserAuthority;
 import com.be90z.domain.user.repository.UserRepository;
@@ -31,7 +35,13 @@ class RaffleControllerTest {
 
 
     @Autowired
-    private SimpleRaffleRepository simpleRaffleRepository;
+    private RaffleRepository raffleRepository;
+
+    @Autowired
+    private MissionRepository missionRepository;
+
+    @Autowired
+    private MissionParticipationRepository participationRepository;
 
     @Autowired
     private UserRepository userRepository;
@@ -39,7 +49,9 @@ class RaffleControllerTest {
     @Autowired
     private MockMvc mockMvc;
     private User testUser;
-    private SimpleRaffle testRaffle;
+    private Raffle testRaffle;
+    private Mission testMission;
+    private MissionParticipation testParticipation;
 
     @BeforeEach
     void setUp() {
@@ -51,21 +63,39 @@ class RaffleControllerTest {
                 .nickname("테스트유저")
                 .email("test@example.com")
                 .auth(UserAuthority.USER)
-                .gender(Gender.MAN)
-                .birth(1990)
                 .createdAt(LocalDateTime.now())
                 .build();
         testUser = userRepository.save(testUser);
 
+        // 테스트 미션 생성
+        testMission = Mission.builder()
+                .missionName("테스트 미션 제목")
+                .missionContent("테스트 미션 내용")
+                .missionGoalCount(1)
+                .startDate(LocalDateTime.now().minusDays(1))
+                .endDate(LocalDateTime.now().plusDays(7))
+                .createdAt(LocalDateTime.now())
+                .build();
+        testMission = missionRepository.save(testMission);
+
+        // 테스트 미션 참여 생성
+        testParticipation = MissionParticipation.builder()
+                .participateStatus(ParticipateStatus.PART_COMPLETE)
+                .participateCount(1)
+                .user(testUser)
+                .mission(testMission)
+                .build();
+        testParticipation = participationRepository.save(testParticipation);
+
         // 테스트 래플 생성
-        testRaffle = SimpleRaffle.builder()
+        testRaffle = Raffle.builder()
+                .raffleCode(1L)
+                .participation(testParticipation)
                 .raffleName("1월 래플")
-                .rafflePrizeCont("스타벅스 아메리카노")
-                .raffleWinner(3)
                 .raffleDate(LocalDateTime.now())
                 .createdAt(LocalDateTime.now())
                 .build();
-        testRaffle = simpleRaffleRepository.save(testRaffle);
+        testRaffle = raffleRepository.save(testRaffle);
     }
 
     @Test
@@ -78,8 +108,8 @@ class RaffleControllerTest {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$").isArray())
             .andExpect(jsonPath("$[0].raffleName").value("1월 래플"))
-            .andExpect(jsonPath("$[0].rafflePrizeCont").value("스타벅스 아메리카노"))
-            .andExpect(jsonPath("$[0].raffleWinner").value(3));
+            .andExpect(jsonPath("$[0].raffleCode").exists())
+            .andExpect(jsonPath("$[0].participateCode").exists());
     }
 
     @Test
@@ -131,7 +161,7 @@ class RaffleControllerTest {
     @DisplayName("POST /api/v1/raffle/draw/{raffleCode} - 래플 추첨 성공")
     void drawRaffle_Success() throws Exception {
         // when & then
-        mockMvc.perform(post("/api/v1/raffle/draw/{raffleCode}", testRaffle.getId())
+        mockMvc.perform(post("/api/v1/raffle/draw/{raffleCode}", testRaffle.getRaffleCode())
                 .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$").isArray());
