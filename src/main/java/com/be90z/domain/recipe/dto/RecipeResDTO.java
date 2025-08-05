@@ -1,7 +1,6 @@
 package com.be90z.domain.recipe.dto;
 
 import com.be90z.domain.recipe.entity.RecipePeople;
-import com.be90z.domain.recipeTag.dto.RecipeTagResDTO;
 import jakarta.persistence.Lob;
 import lombok.Data;
 
@@ -29,10 +28,6 @@ public class RecipeResDTO {
 
     public Long getUserId() {
         return userId;
-    }
-
-    public String getAuthorNickname() {
-        return authorNickname;
     }
 
     public void setAuthorId(Long userId) {
