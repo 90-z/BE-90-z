@@ -4,6 +4,7 @@ import com.be90z.domain.user.entity.User;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -47,6 +48,13 @@ public class Recipe {
     @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Ingredients> ingredients = new ArrayList<>();
 
+    @OneToMany(mappedBy = "recipe", fetch = FetchType.LAZY)
+    private List<Image> images = new ArrayList<>();
+
+    public List<Image> getImages() {
+        return images;
+    }
+
     public Recipe(String recipeName, String recipeContent) {
         this.recipeName = recipeName;
         this.recipeContent = recipeContent;
@@ -72,7 +80,7 @@ public class Recipe {
         ingredient.setRecipe(this);
     }
 
-//    레시피 수정 메서드
+    //    레시피 수정 메서드
     public void updateRecipe(String recipeName, String recipeContent, Integer recipeCalories, String recipeCookMethod, RecipePeople recipePeople, Integer recipeTime) {
         this.recipeName = recipeName;
         this.recipeContent = recipeContent;
