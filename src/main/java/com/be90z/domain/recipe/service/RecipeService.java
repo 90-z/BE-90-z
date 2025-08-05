@@ -1,9 +1,7 @@
 package com.be90z.domain.recipe.service;
 
-import com.be90z.domain.recipe.dto.RecipeAiResDTO;
-import com.be90z.domain.recipe.dto.RecipeCreateFreeDTO;
-import com.be90z.domain.recipe.dto.RecipeResDTO;
-import com.be90z.domain.recipe.dto.RecipeUpdateDTO;
+import com.be90z.domain.bookmark.repository.BookmarkRepository;
+import com.be90z.domain.recipe.dto.*;
 import com.be90z.domain.recipe.entity.Image;
 import com.be90z.domain.recipe.entity.ImageCategory;
 import com.be90z.domain.recipe.entity.Ingredients;
@@ -18,6 +16,8 @@ import com.be90z.external.gemini.service.GeminiResParser;
 import com.be90z.external.gemini.service.GeminiService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,10 +36,10 @@ public class RecipeService {
     private final RecipeRepository recipeRepository;
     private final GeminiService geminiService;
     private final ImageService imageService;
-    private final UserRepository userRepository;
     private final TagService tagService;
     private final GeminiResParser geminiResParser;
     private final RecipeTagService recipeTagService;
+    private final BookmarkRepository bookmarkRepository;
 
     //    레시피 분석 비동기로
     @Transactional
@@ -118,6 +118,28 @@ public class RecipeService {
         Recipe recipe = recipeRepository.findById(recipeCode)
                 .orElseThrow(() -> new RuntimeException("레시피를 찾을 수 없습니다 : " + recipeCode));
         return convertToResponseDTO(recipe);
+    }
+
+    //    상위 레시피 조회
+    @Transactional(readOnly = true)
+    public List<RecipePopularResDTO> getRecipePopular() {
+        Pageable top3 = PageRequest.of(0, 3);
+
+        List<Object[]> getRecipePopular = bookmarkRepository.findTopRecipe(top3);
+
+        return getRecipePopular.stream().map(result -> {
+            Long recipeCode = (Long) result[0];
+            String recipeName = (String) result[1];
+            Long bookmarkCount = (Long) result[2];
+
+//            첫번째 이미지 가져오기
+            List<Image> images = imageService.getImagesByRecipe(recipeCode);
+            String mainImgUrl = null;
+            if(images != null && !images.isEmpty()) {
+                mainImgUrl = images.get(0).getImgS3url();
+            }
+            return new RecipePopularResDTO(recipeCode, recipeName, mainImgUrl, bookmarkCount);
+        }).collect(Collectors.toList());
     }
 
     // 레시피 수정
@@ -266,25 +288,25 @@ public class RecipeService {
         return recipeResDTO;
     }
 
-//    레시피 검색
+    //    레시피 검색
 //    키워드(제목, 내용)나 재료로 검색
     @Transactional(readOnly = true)
     public List<RecipeResDTO> searchRecipe(String keyword, String ingredient) {
-        if((keyword == null || keyword.isEmpty()) && (ingredient == null || ingredient.isEmpty())) {
+        if ((keyword == null || keyword.isEmpty()) && (ingredient == null || ingredient.isEmpty())) {
             return getAllRecipe();
         }
         List<Recipe> recipes = recipeRepository.searchRecipeByKeywordAndIngredient(keyword != null ? keyword.trim() : null,
-                                                                                    ingredient != null ? ingredient.trim() : null);
+                ingredient != null ? ingredient.trim() : null);
         return recipes.stream()
                 .map(this::convertToResponseDTO)
                 .collect(Collectors.toList());
 
     }
 
-//    키워드로 검색
+    //    키워드로 검색
     @Transactional(readOnly = true)
     public List<RecipeResDTO> searchRecipeByKeyword(String keyword) {
-        if(keyword == null || keyword.isEmpty()) {
+        if (keyword == null || keyword.isEmpty()) {
             return getAllRecipe();
         }
         List<Recipe> recipes = recipeRepository.searchByRecipeKeyword(keyword);
@@ -293,10 +315,10 @@ public class RecipeService {
                 .collect(Collectors.toList());
     }
 
-//    재료로 검색
+    //    재료로 검색
     @Transactional(readOnly = true)
     public List<RecipeResDTO> searchRecipeByIngredient(String ingredient) {
-        if(ingredient == null || ingredient.trim().isEmpty()) {
+        if (ingredient == null || ingredient.trim().isEmpty()) {
             return getAllRecipe();
         }
         List<Recipe> recipes = recipeRepository.searchByIngredient(ingredient.trim());
@@ -305,7 +327,7 @@ public class RecipeService {
                 .collect(Collectors.toList());
     }
 
-//    작성자 권환 확인 메서드
+    //    작성자 권환 확인 메서드
     @Transactional(readOnly = true)
     public boolean isRecipeOwner(Long recipeCode, Long userId) {
         Recipe recipe = recipeRepository.findById(recipeCode)
