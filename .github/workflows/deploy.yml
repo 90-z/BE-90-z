@@ -1,0 +1,72 @@
+name: Deploy to AWS EC2
+
+on:
+  push:
+    branches: [ main ]  # main 브랜치에 push될 때만 배포
+  workflow_dispatch:    # 수동 실행도 가능
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'corretto'
+
+      - name: Cache Gradle packages
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Build with Gradle
+        run: ./gradlew clean build -x test
+
+      - name: Make scripts executable
+        run: |
+          chmod +x scripts/stop_application.sh
+          chmod +x scripts/install_dependencies.sh
+          chmod +x scripts/start_application.sh
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-northeast-2
+
+      - name: Create deployment package
+        run: |
+          mkdir -p deploy
+          cp -r . deploy/
+          cd deploy
+# 민감한 파일들 제거
+          rm -rf yml_info/.env
+          rm -rf .git*
+          zip -r ../deployment.zip . -x "*/node_modules/*" "*/target/*" "*/.gradle/*" "yml_info/*.env"
+
+      - name: Upload to S3
+        run: |
+          aws s3 cp deployment.zip s3://90z-deployment-artifacts/deployment-${{ github.sha }}.zip
+
+      - name: Deploy to CodeDeploy
+        run: |
+          aws deploy create-deployment \
+            --application-name 90z-spring-app \
+            --deployment-group-name 90z-spring-deployment-group \
+            --deployment-config-name CodeDeployDefault.AllAtOnce \
+            --s3-location bucket=90z-deployment-artifacts,key=deployment-${{ github.sha }}.zip,bundleType=zip \
+            --description "Automated deployment from GitHub Actions"
