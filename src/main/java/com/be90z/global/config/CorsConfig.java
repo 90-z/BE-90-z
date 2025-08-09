@@ -12,6 +12,7 @@ public class CorsConfig implements WebMvcConfigurer {
                 .allowedOrigins("https://mde.me.kr",
                         "https://www.mde.me.kr",
                         "https://api.mde.me.kr",
+                        "http://localhost:3000",  // 프론트엔드 개발 서버 추가
                         "http://localhost:8080", // 로컬 개발용
                         "http://3.37.33.223:8080", // 배포 서버 ip
                         "https://3.37.33.223:8080" // https 배포 서버
