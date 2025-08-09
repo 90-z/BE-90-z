@@ -18,19 +18,19 @@ public class Mission {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "mission_code")
     private Long missionCode;
-    
+
     @Column(name = "mission_name", nullable = false)
     private String missionName;
     
     @Column(name = "mission_content", nullable = false, columnDefinition = "TEXT")
     private String missionContent;
-    
+
     @Enumerated(EnumType.STRING)
     @Column(name = "mission_status", nullable = false)
     private MissionStatus missionStatus = MissionStatus.ACTIVE;
     
-    @Column(name = "mission_max")
-    private Integer missionMax;
+    @Column(name = "mission_goal_count")
+    private Integer missionGoalCount;
     
     @Column(name = "start_date", nullable = false)
     private LocalDateTime startDate;
@@ -43,7 +43,7 @@ public class Mission {
     
     @Builder
     public Mission(Long missionCode, String missionName, String missionContent,
-                   MissionStatus missionStatus, Integer missionMax, LocalDateTime startDate, LocalDateTime endDate, LocalDateTime createdAt) {
+                   MissionStatus missionStatus, Integer missionGoalCount, LocalDateTime startDate, LocalDateTime endDate, LocalDateTime createdAt) {
         if (missionName == null) {
             throw new IllegalArgumentException("Mission name cannot be null");
         }
@@ -55,14 +55,14 @@ public class Mission {
         this.missionName = missionName;
         this.missionContent = missionContent;
         this.missionStatus = missionStatus != null ? missionStatus : MissionStatus.ACTIVE;
-        this.missionMax = missionMax;
+        this.missionGoalCount = missionGoalCount;
         this.startDate = startDate;
         this.endDate = endDate;
         this.createdAt = createdAt != null ? createdAt : LocalDateTime.now();
     }
     
     public void updateMission(String missionName, String missionContent, 
-                             LocalDateTime startDate, LocalDateTime endDate, Integer missionMax) {
+                             LocalDateTime startDate, LocalDateTime endDate, Integer missionGoalCount) {
         if (missionName != null) {
             this.missionName = missionName;
         }
@@ -75,8 +75,8 @@ public class Mission {
         if (endDate != null) {
             this.endDate = endDate;
         }
-        if (missionMax != null) {
-            this.missionMax = missionMax;
+        if (missionGoalCount != null) {
+            this.missionGoalCount = missionGoalCount;
         }
     }
 }
