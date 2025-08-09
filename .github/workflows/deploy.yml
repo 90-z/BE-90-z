@@ -2,8 +2,8 @@ name: Deploy to AWS EC2
 
 on:
   push:
-    branches: [ main ]  # main 브랜치에 push될 때만 배포
-  workflow_dispatch:    # 수동 실행도 가능
+    branches: [ main ]
+  workflow_dispatch:
 
 jobs:
   deploy:
@@ -53,7 +53,6 @@ jobs:
           mkdir -p deploy
           cp -r . deploy/
           cd deploy
-# 민감한 파일들 제거
           rm -rf yml_info/.env
           rm -rf .git*
           zip -r ../deployment.zip . -x "*/node_modules/*" "*/target/*" "*/.gradle/*" "yml_info/*.env"
