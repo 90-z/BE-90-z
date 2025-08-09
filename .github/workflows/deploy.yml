@@ -50,15 +50,10 @@ jobs:
 
       - name: Create deployment package
         run: |
-        # 제외할 파일들 임시로 이동
           mkdir -p temp_backup
           mv .git temp_backup/ || true
           mv yml_info temp_backup/ || true
-        
-        # 배포 패키지 생성
           zip -r deployment.zip . -x "*/node_modules/*" "*/target/*" "*/.gradle/*" "temp_backup/*"
-        
-        # 백업된 파일들 복원
           mv temp_backup/.git . || true
           mv temp_backup/yml_info . || true
           rm -rf temp_backup
