@@ -2,6 +2,7 @@ package com.be90z.domain.recipe.controller;
 
 import com.be90z.domain.recipe.dto.*;
 import com.be90z.domain.recipe.service.RecipeService;
+import com.be90z.domain.recommend.dto.RecommendRecipeResDTO;
 import com.be90z.domain.user.dto.response.AuthErrorResDTO;
 import com.be90z.domain.user.entity.User;
 import com.be90z.global.util.AuthUtil;
@@ -115,14 +116,6 @@ public class RecipeController {
     public ResponseEntity<RecipeResDTO> getRecipe(@PathVariable Long recipeCode) {
         RecipeResDTO recipeResDTO = recipeService.getRecipe(recipeCode);
         return ResponseEntity.ok(recipeResDTO);
-    }
-
-    //    인기 레시피 조회
-    @GetMapping("/popular")
-    @Operation(summary = "상위 레시피 3개 조회", description = "북마크 수가 많은 상위 레시피 3개를 조회합니다.")
-    public ResponseEntity<List<RecipePopularResDTO>> getPopularRecipe() {
-        List<RecipePopularResDTO> recipePopularResDTO = recipeService.getRecipePopular();
-        return ResponseEntity.ok(recipePopularResDTO);
     }
 
     @PutMapping(value = "/{recipeCode}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
