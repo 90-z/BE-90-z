@@ -1,7 +1,10 @@
 package com.be90z.domain.recipe.service;
 
 import com.be90z.domain.bookmark.repository.BookmarkRepository;
-import com.be90z.domain.recipe.dto.*;
+import com.be90z.domain.recipe.dto.RecipeAiResDTO;
+import com.be90z.domain.recipe.dto.RecipeCreateFreeDTO;
+import com.be90z.domain.recipe.dto.RecipeResDTO;
+import com.be90z.domain.recipe.dto.RecipeUpdateDTO;
 import com.be90z.domain.recipe.entity.Image;
 import com.be90z.domain.recipe.entity.ImageCategory;
 import com.be90z.domain.recipe.entity.Ingredients;
@@ -9,15 +12,12 @@ import com.be90z.domain.recipe.entity.Recipe;
 import com.be90z.domain.recipe.repository.RecipeRepository;
 import com.be90z.domain.recipeTag.dto.RecipeTagResDTO;
 import com.be90z.domain.recipeTag.service.RecipeTagService;
-import com.be90z.domain.recommend.dto.RecommendRecipeResDTO;
 import com.be90z.domain.tag.service.TagService;
 import com.be90z.domain.user.entity.User;
 import com.be90z.external.gemini.service.GeminiResParser;
 import com.be90z.external.gemini.service.GeminiService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -153,8 +153,8 @@ public class RecipeService {
             for (RecipeUpdateDTO.IngredientsDTO ingredientDTO : recipeUpdateDTO.getIngredientsList()) {
                 if (ingredientDTO.getIngredientsName() != null &&
                         !ingredientDTO.getIngredientsName().trim().isEmpty() &&
-                        ingredientDTO.getIngredientsCount() != null &&
-                        ingredientDTO.getIngredientsCount() > 0) {
+                        ingredientDTO.getIngredientsCount() != null
+                        ) {
 
                     Ingredients ingredients = new Ingredients(
                             ingredientDTO.getIngredientsName().trim(),
