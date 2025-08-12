@@ -18,13 +18,13 @@ public class Ingredients {
     private String ingredientsName;
 
     @Column(name="ingredients_count", nullable = false)
-    private Integer ingredientsCount;
+    private String ingredientsCount;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="recipe_code")
     private Recipe recipe;
 
-    public Ingredients(String ingredientsName, Integer ingredientsCount) {
+    public Ingredients(String ingredientsName, String ingredientsCount) {
         this.ingredientsName = ingredientsName;
         this.ingredientsCount = ingredientsCount;
     }

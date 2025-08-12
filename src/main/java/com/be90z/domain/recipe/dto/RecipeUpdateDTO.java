@@ -21,6 +21,6 @@ public class RecipeUpdateDTO {
     @Data
     public static class IngredientsDTO {
         private String ingredientsName;
-        private Integer ingredientsCount;
+        private String ingredientsCount;
     }
 }

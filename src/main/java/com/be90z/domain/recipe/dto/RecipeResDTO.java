@@ -42,7 +42,7 @@ public class RecipeResDTO {
     public static class IngredientsResDTO {
         private Long ingredientsCode;
         private String ingredientsName;
-        private Integer ingredientsCount;
+        private String ingredientsCount;
     }
 
     @Data
