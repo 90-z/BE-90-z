@@ -151,9 +151,9 @@ CREATE TABLE IF NOT EXISTS search_writing (
                                               search_writing_ment VARCHAR(255) NOT NULL COMMENT '검색 라이팅 멘트'
     );
 
-INSERT INTO tag VALUES (1, '⚡전자레인지');
-INSERT INTO tag VALUES (2, '🍗에어프라이어');
-INSERT INTO tag VALUES (3, '🍳프라이팬');
-INSERT INTO tag VALUES (4, '🍲냄비');
-INSERT INTO tag VALUES (5, '🔥오븐');
-INSERT INTO tag VALUES (6, '🍽️불 없이 요리');
+INSERT INTO tag VALUES (1, '전자레인지');
+INSERT INTO tag VALUES (2, '에어프라이어');
+INSERT INTO tag VALUES (3, '프라이팬');
+INSERT INTO tag VALUES (4, '냄비');
+INSERT INTO tag VALUES (5, '오븐');
+INSERT INTO tag VALUES (6, '️불 없이 요리');
