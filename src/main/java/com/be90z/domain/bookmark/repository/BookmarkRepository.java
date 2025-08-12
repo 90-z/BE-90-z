@@ -28,10 +28,12 @@ public interface BookmarkRepository extends JpaRepository<Bookmark, Long> {
     @Query("SELECT b FROM Bookmark b JOIN FETCH b.recipe WHERE b.user.userId = :userId ORDER BY b.createdAt DESC")
     List<Bookmark> findByUserIdWithRecipe(@Param("userId") Long userId);
 
-//    인기 레시피 위한 북마크 카운트
-    @Query("SELECT b.recipe.recipeCode, b.recipe.recipeName, COUNT(b) AS bookmarkCount " +
-            "FROM Bookmark b " +
-            "GROUP BY b.recipe.recipeCode, b.recipe.recipeName " +
-            "ORDER BY COUNT(b) DESC ")
+//    비로그인 시 인기 레시피 위한 북마크 카운트
+    @Query("""
+            SELECT b.recipe.recipeCode, b.recipe.recipeName, COUNT(b) AS bookmarkCount
+                        FROM Bookmark b
+                        GROUP BY b.recipe.recipeCode, b.recipe.recipeName
+                        ORDER BY COUNT(b) DESC
+            """)
     List<Object[]> findTopRecipe(Pageable pageable);
 }
