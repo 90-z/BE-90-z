@@ -20,6 +20,9 @@ DROP TABLE IF EXISTS user;                 -- 다른 테이블에서 참조됨
 DROP TABLE IF EXISTS tag;                  -- 독립적인 테이블
 DROP TABLE IF EXISTS search_writing;       -- 독립적인 테이블
 
+-- 배포 시 인코딩 문제
+ALTER DATABASE 90z CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
 -- 사용자 테이블 생성
 CREATE TABLE IF NOT EXISTS user (
                                     user_id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY COMMENT '회원 번호',
@@ -156,4 +159,4 @@ INSERT INTO tag VALUES (2, '에어프라이어');
 INSERT INTO tag VALUES (3, '프라이팬');
 INSERT INTO tag VALUES (4, '냄비');
 INSERT INTO tag VALUES (5, '오븐');
-INSERT INTO tag VALUES (6, '️불 없이 요리');
+INSERT INTO tag VALUES (6, '불 없이 요리');
