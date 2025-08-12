@@ -9,9 +9,9 @@ import com.be90z.domain.recipe.entity.Recipe;
 import com.be90z.domain.recipe.repository.RecipeRepository;
 import com.be90z.domain.recipeTag.dto.RecipeTagResDTO;
 import com.be90z.domain.recipeTag.service.RecipeTagService;
+import com.be90z.domain.recommend.dto.RecommendRecipeResDTO;
 import com.be90z.domain.tag.service.TagService;
 import com.be90z.domain.user.entity.User;
-import com.be90z.domain.user.repository.UserRepository;
 import com.be90z.external.gemini.service.GeminiResParser;
 import com.be90z.external.gemini.service.GeminiService;
 import lombok.RequiredArgsConstructor;
@@ -118,28 +118,6 @@ public class RecipeService {
         Recipe recipe = recipeRepository.findById(recipeCode)
                 .orElseThrow(() -> new RuntimeException("레시피를 찾을 수 없습니다 : " + recipeCode));
         return convertToResponseDTO(recipe);
-    }
-
-    //    상위 레시피 조회
-    @Transactional(readOnly = true)
-    public List<RecipePopularResDTO> getRecipePopular() {
-        Pageable top3 = PageRequest.of(0, 3);
-
-        List<Object[]> getRecipePopular = bookmarkRepository.findTopRecipe(top3);
-
-        return getRecipePopular.stream().map(result -> {
-            Long recipeCode = (Long) result[0];
-            String recipeName = (String) result[1];
-            Long bookmarkCount = (Long) result[2];
-
-//            첫번째 이미지 가져오기
-            List<Image> images = imageService.getImagesByRecipe(recipeCode);
-            String mainImgUrl = null;
-            if(images != null && !images.isEmpty()) {
-                mainImgUrl = images.get(0).getImgS3url();
-            }
-            return new RecipePopularResDTO(recipeCode, recipeName, mainImgUrl, bookmarkCount);
-        }).collect(Collectors.toList());
     }
 
     // 레시피 수정
