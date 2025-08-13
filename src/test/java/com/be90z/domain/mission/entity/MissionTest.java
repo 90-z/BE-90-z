@@ -88,8 +88,8 @@ class MissionTest {
         String newMissionName = "수정된 미션명";
         String newMissionContent = "수정된 내용";
         
-        // when - 새로운 시그니처 사용: updateMission(missionName, missionContent)
-        mission.updateMission(newMissionName, newMissionContent);
+        // when - 실제 시그니처 사용: updateMission(missionName, missionContent, startDate, endDate, goalCount)
+        mission.updateMission(newMissionName, newMissionContent, null, null, null);
         
         // then
         assertThat(mission.getMissionName()).isEqualTo(newMissionName);

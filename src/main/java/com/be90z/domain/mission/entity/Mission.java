@@ -55,7 +55,7 @@ public class Mission {
         this.missionName = missionName;
         this.missionContent = missionContent;
         this.missionStatus = missionStatus != null ? missionStatus : MissionStatus.ACTIVE;
-        this.missionGoalCount = missionGoalCount;
+        this.missionGoalCount = missionGoalCount != null ? missionGoalCount : 1;
         this.startDate = startDate;
         this.endDate = endDate;
         this.createdAt = createdAt != null ? createdAt : LocalDateTime.now();
