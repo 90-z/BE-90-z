@@ -176,7 +176,8 @@ public class MissionService {
                 .orElseThrow(() -> new NotFoundException("Mission not found with code: " + missionCode));
         
         // 명세서에 맞는 페이로드: {missionName, missionContent}
-//        mission.updateMission(request.getMissionName(), request.getMissionContent());
+        mission.updateMission(request.getMissionName(), request.getMissionContent(), 
+                             null, null, null);
         
         Mission updatedMission = missionRepository.save(mission);
         
