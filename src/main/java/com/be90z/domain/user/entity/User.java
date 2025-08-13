@@ -56,4 +56,11 @@ public class User {
         this.auth = auth != null ? auth : UserAuthority.USER;
         this.createdAt = createdAt != null ? createdAt : LocalDateTime.now();
     }
+    
+    public void updateNickname(String nickname) {
+        if (nickname == null) {
+            throw new IllegalArgumentException("Nickname cannot be null");
+        }
+        this.nickname = nickname;
+    }
 }
