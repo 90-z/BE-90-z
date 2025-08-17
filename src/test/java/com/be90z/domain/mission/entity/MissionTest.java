@@ -22,7 +22,6 @@ class MissionTest {
 
         // when
         Mission mission = Mission.builder()
-                .missionName("테스트 미션명")
                 .missionContent(missionContent)
                 .missionGoalCount(missionGoalCount)
                 .startDate(startDate)
@@ -42,7 +41,6 @@ class MissionTest {
     void createMission_MissionContentNull_ThrowsException() {
         // when & then
         assertThatThrownBy(() -> Mission.builder()
-                .missionName("테스트 미션명")
                 .missionContent(null)
                 .missionGoalCount(100)
                 .startDate(LocalDateTime.now())
@@ -62,7 +60,6 @@ class MissionTest {
 
         // when
         Mission mission = Mission.builder()
-                .missionName("기본값 테스트 미션명")
                 .missionContent(missionContent)
                 .startDate(startDate)
                 .endDate(endDate)
@@ -78,21 +75,18 @@ class MissionTest {
     void updateMission() {
         // given
         Mission mission = Mission.builder()
-                .missionName("원래 미션명")
                 .missionContent("원래 내용")
                 .missionGoalCount(50)
                 .startDate(LocalDateTime.now())
                 .endDate(LocalDateTime.now().plusDays(7))
                 .build();
         
-        String newMissionName = "수정된 미션명";
         String newMissionContent = "수정된 내용";
         
-        // when - 실제 시그니처 사용: updateMission(missionName, missionContent, startDate, endDate, goalCount)
-        mission.updateMission(newMissionName, newMissionContent, null, null, null);
+        // when - updateMission 메서드 시그니처에서 missionName 제거
+        mission.updateMission(newMissionContent, null, null, null);
         
         // then
-        assertThat(mission.getMissionName()).isEqualTo(newMissionName);
         assertThat(mission.getMissionContent()).isEqualTo(newMissionContent);
     }
 }

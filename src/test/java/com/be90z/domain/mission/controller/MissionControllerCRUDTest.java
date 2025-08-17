@@ -71,7 +71,6 @@ class MissionControllerCRUDTest {
 
         // 테스트 미션 생성
         testMission = Mission.builder()
-                .missionName("테스트 미션 제목")
                 .missionContent("테스트 미션 내용")
                 .missionGoalCount(100)
                 .startDate(LocalDateTime.now().minusDays(1))
@@ -145,11 +144,10 @@ class MissionControllerCRUDTest {
 
     @Test
     @WithMockUser
-    @DisplayName("PUT /api/v1/mission/{missionCode} - 미션 수정 성공 (명세서 준수)")
+    @DisplayName("PUT /api/v1/mission/{missionCode} - 미션 수정 성공")
     void updateMission_Success() throws Exception {
-        // given - 명세서에 맞는 페이로드: {missionName, missionContent}
+        // given
         MissionUpdateReqDTO request = MissionUpdateReqDTO.builder()
-                .missionName("수정된 미션 제목")
                 .missionContent("수정된 미션 내용")
                 .build();
 
@@ -158,7 +156,6 @@ class MissionControllerCRUDTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.missionName").value("수정된 미션 제목"))
             .andExpect(jsonPath("$.missionContent").value("수정된 미션 내용"))
             .andExpect(jsonPath("$.missionCode").value(testMission.getMissionCode()));
     }
@@ -167,10 +164,9 @@ class MissionControllerCRUDTest {
     @WithMockUser
     @DisplayName("PUT /api/v1/mission/{missionCode} - 잘못된 요청으로 미션 수정 실패")
     void updateMission_BadRequest() throws Exception {
-        // given - missionName이 빈 문자열로 @NotBlank 위반
+        // given - missionContent가 빈 문자열로 @NotBlank 위반
         MissionUpdateReqDTO request = MissionUpdateReqDTO.builder()
-                .missionName("")  // @NotBlank 위반
-                .missionContent("수정된 미션 내용")
+                .missionContent("")  // @NotBlank 위반
                 .build();
 
         // when & then
@@ -184,9 +180,8 @@ class MissionControllerCRUDTest {
     @WithMockUser
     @DisplayName("PUT /api/v1/mission/{missionCode} - 존재하지 않는 미션 수정 실패")
     void updateMission_NotFound() throws Exception {
-        // given - 명세서에 맞는 페이로드
+        // given
         MissionUpdateReqDTO request = MissionUpdateReqDTO.builder()
-                .missionName("수정된 미션 제목")
                 .missionContent("수정된 미션 내용")
                 .build();
 
@@ -293,7 +288,6 @@ class MissionControllerCRUDTest {
     void registerMission_Success() throws Exception {
         // given
         MissionRegistrationReqDTO request = MissionRegistrationReqDTO.builder()
-                .missionName("새로운 챌린지")
                 .missionContent("매일 물 2L 마시기 챌린지")
                 .build();
 
@@ -302,7 +296,6 @@ class MissionControllerCRUDTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.missionName").value("새로운 챌린지"))
             .andExpect(jsonPath("$.missionContent").value("매일 물 2L 마시기 챌린지"))
             .andExpect(jsonPath("$.missionCode").value(testMission.getMissionCode()))
             .andExpect(jsonPath("$.registrationId").exists())
@@ -313,10 +306,9 @@ class MissionControllerCRUDTest {
     @WithMockUser
     @DisplayName("POST /api/v1/mission/{missionCode}/reply - 잘못된 요청으로 챌린지 등록 실패")
     void registerMission_BadRequest() throws Exception {
-        // given - missionName을 빈 문자열로 설정하여 @NotBlank 위반
+        // given - missionContent를 빈 문자열로 설정하여 @NotBlank 위반
         MissionRegistrationReqDTO request = MissionRegistrationReqDTO.builder()
-                .missionName("")  // @NotBlank 위반
-                .missionContent("매일 물 2L 마시기 챌린지")
+                .missionContent("")  // @NotBlank 위반
                 .build();
 
         // when & then
@@ -332,7 +324,6 @@ class MissionControllerCRUDTest {
     void registerMission_MissionNotFound() throws Exception {
         // given
         MissionRegistrationReqDTO request = MissionRegistrationReqDTO.builder()
-                .missionName("새로운 챌린지")
                 .missionContent("매일 물 2L 마시기 챌린지")
                 .build();
 
@@ -345,11 +336,10 @@ class MissionControllerCRUDTest {
 
     @Test
     @WithMockUser
-    @DisplayName("POST /api/v1/mission/{missionCode}/reply - 중복된 챌린지명으로 등록 실패")
-    void registerMission_DuplicateName() throws Exception {
+    @DisplayName("POST /api/v1/mission/{missionCode}/reply - 빈 컨텐츠로 등록 실패")
+    void registerMission_EmptyContent() throws Exception {
         // given - missionContent를 빈 문자열로 설정하여 @NotBlank 위반
         MissionRegistrationReqDTO request = MissionRegistrationReqDTO.builder()
-                .missionName("새로운 챌린지")
                 .missionContent("")  // @NotBlank 위반
                 .build();
 

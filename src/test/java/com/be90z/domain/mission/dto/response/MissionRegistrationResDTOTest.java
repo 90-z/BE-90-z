@@ -20,7 +20,6 @@ class MissionRegistrationResDTOTest {
         MissionRegistrationResDTO dto = MissionRegistrationResDTO.builder()
                 .registrationId(1L)
                 .missionCode(100L)
-                .missionName("새로운 챌린지")
                 .missionContent("매일 물 2L 마시기 챌린지")
                 .createdAt(now)
                 .build();
@@ -28,7 +27,6 @@ class MissionRegistrationResDTOTest {
         // then
         assertThat(dto.getRegistrationId()).isEqualTo(1L);
         assertThat(dto.getMissionCode()).isEqualTo(100L);
-        assertThat(dto.getMissionName()).isEqualTo("새로운 챌린지");
         assertThat(dto.getMissionContent()).isEqualTo("매일 물 2L 마시기 챌린지");
         assertThat(dto.getCreatedAt()).isEqualTo(now);
     }
@@ -40,7 +38,6 @@ class MissionRegistrationResDTOTest {
         MissionRegistrationResDTO dto = MissionRegistrationResDTO.builder()
                 .registrationId(2L)
                 .missionCode(200L)
-                .missionName("운동 챌린지")
                 .missionContent("매일 30분 운동하기")
                 .createdAt(LocalDateTime.of(2025, 1, 1, 10, 0))
                 .build();
@@ -48,7 +45,6 @@ class MissionRegistrationResDTOTest {
         // then
         assertThat(dto.getRegistrationId()).isEqualTo(2L);
         assertThat(dto.getMissionCode()).isEqualTo(200L);
-        assertThat(dto.getMissionName()).isEqualTo("운동 챌린지");
         assertThat(dto.getMissionContent()).isEqualTo("매일 30분 운동하기");
         assertThat(dto.getCreatedAt()).isEqualTo(LocalDateTime.of(2025, 1, 1, 10, 0));
     }

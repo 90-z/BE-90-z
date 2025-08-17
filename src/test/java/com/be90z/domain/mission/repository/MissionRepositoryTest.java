@@ -25,7 +25,6 @@ class MissionRepositoryTest {
     void findMissions() {
         // given
         Mission activeMission = Mission.builder()
-                .missionName("활성 미션 제목")
                 .missionContent("활성 미션 내용")
                 .missionGoalCount(100)
                 .startDate(LocalDateTime.now())
@@ -34,7 +33,6 @@ class MissionRepositoryTest {
                 .build();
 
         Mission completedMission = Mission.builder()
-                .missionName("완료된 미션 제목")
                 .missionContent("완료된 미션 내용")
                 .missionGoalCount(50)
                 .startDate(LocalDateTime.now().minusDays(7))
@@ -59,7 +57,6 @@ class MissionRepositoryTest {
     void findMissionsOrderByCreatedAtDesc() {
         // given
         Mission mission1 = Mission.builder()
-                .missionName("첫 번째 미션 제목")
                 .missionContent("첫 번째 미션 내용")
                 .missionGoalCount(100)
                 .startDate(LocalDateTime.now())
@@ -68,7 +65,6 @@ class MissionRepositoryTest {
                 .build();
 
         Mission mission2 = Mission.builder()
-                .missionName("두 번째 미션 제목")
                 .missionContent("두 번째 미션 내용")
                 .missionGoalCount(200)
                 .startDate(LocalDateTime.now())

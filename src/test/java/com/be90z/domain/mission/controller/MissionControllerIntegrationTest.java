@@ -57,7 +57,6 @@ class MissionControllerIntegrationTest {
         testUser = userRepository.save(testUser);
 
         testMission = Mission.builder()
-                .missionName("물 마시기 미션")
                 .missionContent("하루에 물 8잔을 마시고 인증샷을 올려주세요")
                 .missionGoalCount(100)
                 .startDate(LocalDateTime.now().minusDays(1))

@@ -44,7 +44,6 @@ class MissionServiceTest {
         // given
         Mission mission1 = Mission.builder()
                 .missionCode(1L)
-                .missionName("물 마시기 미션")
                 .missionContent("하루에 물을 8잔 이상 마시기")
                 .missionGoalCount(100)
                 .startDate(LocalDateTime.now())
@@ -54,7 +53,6 @@ class MissionServiceTest {
 
         Mission mission2 = Mission.builder()
                 .missionCode(2L)
-                .missionName("운동 미션")
                 .missionContent("하루 30분 이상 운동하기")
                 .missionGoalCount(50)
                 .startDate(LocalDateTime.now())

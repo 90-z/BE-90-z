@@ -50,7 +50,6 @@ public class MissionService {
         }
         
         Mission mission = Mission.builder()
-                .missionName("기본 미션명") // missionName 필드 추가 (필수)
                 .missionContent(request.getMissionContent())
                 .missionGoalCount(request.getMissionGoalCount())
                 .startDate(request.getStartDate())
@@ -142,7 +141,6 @@ public class MissionService {
         
         return MissionDetailResDTO.builder()
                 .missionCode(mission.getMissionCode())
-                .missionName(mission.getMissionName())
                 .missionContent(mission.getMissionContent())
                 .missionGoalCount(mission.getMissionGoalCount())
                 .startDate(mission.getStartDate())
@@ -175,8 +173,8 @@ public class MissionService {
         Mission mission = missionRepository.findById(missionCode)
                 .orElseThrow(() -> new NotFoundException("Mission not found with code: " + missionCode));
         
-        // 명세서에 맞는 페이로드: {missionName, missionContent}
-        mission.updateMission(request.getMissionName(), request.getMissionContent(), 
+        // 미션 내용만 업데이트
+        mission.updateMission(request.getMissionContent(), 
                              null, null, null);
         
         Mission updatedMission = missionRepository.save(mission);
@@ -186,7 +184,6 @@ public class MissionService {
         
         return MissionDetailResDTO.builder()
                 .missionCode(updatedMission.getMissionCode())
-                .missionName(updatedMission.getMissionName())
                 .missionContent(updatedMission.getMissionContent())
                 .missionGoalCount(updatedMission.getMissionGoalCount())
                 .startDate(updatedMission.getStartDate())
@@ -279,11 +276,6 @@ public class MissionService {
         Mission mission = missionRepository.findById(missionCode)
                 .orElseThrow(() -> new NotFoundException("미션을 찾을 수 없습니다"));
 
-        // 미션명 유효성 검사
-        if (request.getMissionName() == null || request.getMissionName().trim().isEmpty()) {
-            throw new IllegalArgumentException("미션명은 필수입니다");
-        }
-
         // 미션 내용 유효성 검사
         if (request.getMissionContent() == null || request.getMissionContent().trim().isEmpty()) {
             throw new IllegalArgumentException("미션 내용은 필수입니다");
@@ -296,7 +288,6 @@ public class MissionService {
         return MissionRegistrationResDTO.builder()
                 .registrationId(registrationId)
                 .missionCode(mission.getMissionCode())
-                .missionName(request.getMissionName())
                 .missionContent(request.getMissionContent())
                 .createdAt(LocalDateTime.now())
                 .build();
