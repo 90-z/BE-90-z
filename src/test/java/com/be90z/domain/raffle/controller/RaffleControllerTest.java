@@ -69,7 +69,6 @@ class RaffleControllerTest {
 
         // 테스트 미션 생성
         testMission = Mission.builder()
-                .missionName("테스트 미션 제목")
                 .missionContent("테스트 미션 내용")
                 .missionGoalCount(1)
                 .startDate(LocalDateTime.now().minusDays(1))

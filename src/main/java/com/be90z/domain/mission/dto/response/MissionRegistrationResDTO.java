@@ -17,9 +17,6 @@ public class MissionRegistrationResDTO {
     @Schema(description = "미션 코드", example = "100")
     private Long missionCode;
     
-    @Schema(description = "미션명", example = "매일 운동하기")
-    private String missionName;
-    
     @Schema(description = "미션 내용", example = "매일 30분씩 운동하는 챌린지")
     private String missionContent;
     

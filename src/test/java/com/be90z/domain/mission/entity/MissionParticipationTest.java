@@ -26,7 +26,6 @@ class MissionParticipationTest {
 
         Mission mission = Mission.builder()
                 .missionCode(1L)
-                .missionName("테스트 미션 제목")
                 .missionContent("테스트 미션 내용")
                 .missionGoalCount(100)
                 .startDate(LocalDateTime.now())

@@ -28,7 +28,6 @@ class RaffleTest {
                 .build();
 
         Mission mission = Mission.builder()
-                .missionName("테스트 미션 제목")
                 .missionContent("테스트 미션")
                 .missionGoalCount(1)
                 .startDate(LocalDateTime.now())
@@ -78,7 +77,6 @@ class RaffleTest {
                 .build();
 
         Mission mission = Mission.builder()
-                .missionName("테스트 미션 제목")
                 .missionContent("테스트 미션")
                 .missionGoalCount(1)
                 .startDate(LocalDateTime.now())
@@ -118,7 +116,6 @@ class RaffleTest {
                 .build();
 
         Mission mission = Mission.builder()
-                .missionName("테스트 미션 제목")
                 .missionContent("테스트 미션")
                 .missionGoalCount(1)
                 .startDate(LocalDateTime.now())

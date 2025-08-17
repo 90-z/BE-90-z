@@ -19,8 +19,6 @@ public class Mission {
     @Column(name = "mission_code")
     private Long missionCode;
 
-    @Column(name = "mission_name", nullable = false)
-    private String missionName;
     
     @Column(name = "mission_content", nullable = false, columnDefinition = "TEXT")
     private String missionContent;
@@ -42,17 +40,13 @@ public class Mission {
     private LocalDateTime createdAt;
     
     @Builder
-    public Mission(Long missionCode, String missionName, String missionContent,
+    public Mission(Long missionCode, String missionContent,
                    MissionStatus missionStatus, Integer missionGoalCount, LocalDateTime startDate, LocalDateTime endDate, LocalDateTime createdAt) {
-        if (missionName == null) {
-            throw new IllegalArgumentException("Mission name cannot be null");
-        }
         if (missionContent == null) {
             throw new IllegalArgumentException("Mission content cannot be null");
         }
         
         this.missionCode = missionCode;
-        this.missionName = missionName;
         this.missionContent = missionContent;
         this.missionStatus = missionStatus != null ? missionStatus : MissionStatus.ACTIVE;
         this.missionGoalCount = missionGoalCount != null ? missionGoalCount : 1;
@@ -61,11 +55,8 @@ public class Mission {
         this.createdAt = createdAt != null ? createdAt : LocalDateTime.now();
     }
     
-    public void updateMission(String missionName, String missionContent, 
+    public void updateMission(String missionContent, 
                              LocalDateTime startDate, LocalDateTime endDate, Integer missionGoalCount) {
-        if (missionName != null) {
-            this.missionName = missionName;
-        }
         if (missionContent != null) {
             this.missionContent = missionContent;
         }
